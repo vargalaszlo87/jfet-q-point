@@ -1,0 +1,2 @@
+# jfet-q-point
+ 
