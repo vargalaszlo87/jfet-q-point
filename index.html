@@ -102,44 +102,42 @@
         }
 
         function jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep) {
-				// n channel
-					let i = 0;
-					let V_GSActucal;
-					for (V_GSActual = V_GSLow; V_GSActual <= V_GSUp; V_GSActual += V_GSStep) { 
-						transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex));
-						transferV_GS.push(V_GSActual);
-					}
-					if (I_DSS == 0.0)
-						 I_DSS = solveI_D(V_DD, 0, T, jfetIndex);					
-					if (transferI_D.slice(-1) < I_DSS) {
-						transferI_D.push(I_DSS);
-						transferV_GS.push(0);
-					}
+        // n channel
+            let i = 0;
+            let V_GSActucal;
+            for (V_GSActual = V_GSLow; V_GSActual <= V_GSUp; V_GSActual += V_GSStep) { 
+                transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex));
+                transferV_GS.push(V_GSActual);
+            }
+            if (I_DSS == 0.0)
+                    I_DSS = solveI_D(V_DD, 0, T, jfetIndex);					
+            if (transferI_D.slice(-1) < I_DSS) {
+                transferI_D.push(I_DSS);
+                transferV_GS.push(0);
+            }
         }
-
 
         jfetQPointCalc(1, 4.0, 0, 26); // (jfetIndex, V_DD, V_GS, Temperature)
 
-
-            console.log("uds: " + V_DS);
-            console.log("ugs0: " + V_GS0);
-            console.log("I_D0: " + I_D0);
-            console.log("I_DSS: " + I_DSS);
-            console.log("---");				
-            console.log("RS: " + Rs);
-            console.log("RD: " + Rd);
-						
-					jfetTransferCharacteristicMake(1, 4.0, 26, -1.7372, 0, V_GSStep);
-					
-					console.log(transferI_D);
-					console.log(transferV_GS);
+        console.log("uds: " + V_DS);
+        console.log("ugs0: " + V_GS0);
+        console.log("I_D0: " + I_D0);
+        console.log("I_DSS: " + I_DSS);
+        console.log("---");				
+        console.log("RS: " + Rs);
+        console.log("RD: " + Rd);
+                    
+        jfetTransferCharacteristicMake(1, 4.0, 26, -1.7372, 0, V_GSStep);
+        
+        console.log(transferI_D);
+        console.log(transferV_GS);
 				
     </script>
 </head>
 
 <body>
 
-    teszt
+    No output yet.
 
 </body>
 
