@@ -47,6 +47,9 @@
             // transfer characteristic
             var transferV_GS = [];
             var transferI_D = [];
+            // simulation
+            var T = 26.85;
+            var V_DD = 10.0;
     
             function jfetTransferCharacteristic(V_GS, V_DS, LAMBDA, BETA, V_TO) {
                 return (V_GS < V_TO) ? 0.0 : ((BETA * Math.pow(V_GS - V_TO, 2)) * (1 + LAMBDA * V_DS));
@@ -95,34 +98,43 @@
                 Rs = Math.abs(V_GS0 / I_D0);
                 Rd = (V_DD - V_DS - Math.abs(V_GS0)) / I_D0;
             }
-    
-            function jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep) {
+
+
+            function jfetTransferCharacteristicMake(jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, V_GSStep) {
                 // n channel
+                V_GSLow = _V_GSLow;
+                V_GSUp = _V_GSUp;
                 let i = 0;
                 let V_GSActucal;
                 for (V_GSActual = V_GSLow; V_GSActual <= V_GSUp; V_GSActual += V_GSStep) { 
-                    transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex));
-                    transferV_GS.push(V_GSActual);
+                    transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex)*1e3);
+                    transferV_GS.push(V_GSActual.toFixed(4));
                 }
                 if (I_DSS == 0.0)
                         I_DSS = solveI_D(V_DD, 0, T, jfetIndex);					
-                if (transferI_D.slice(-1) < I_DSS) {
-                    transferI_D.push(I_DSS);
-                    transferV_GS.push(0);
+                if (transferI_D.slice(-1) < I_DSS*1e3) {
+                    transferI_D.push(I_DSS*1e3);
+                    transferV_GS.push('0');
                 }
             }
     
-            jfetQPointCalc(1, 4.0, 0, 26); // (jfetIndex, V_DD, V_GS, Temperature)
+            // (jfetIndex, V_DD, V_GS, Temperature)
+            jfetQPointCalc(0, V_DD, 0, T); 
     
-            console.log("uds: " + V_DS);
+/*            console.log("uds: " + V_DS);
             console.log("ugs0: " + V_GS0);
             console.log("I_D0: " + I_D0);
             console.log("I_DSS: " + I_DSS);
             console.log("---");				
             console.log("RS: " + Rs);
             console.log("RD: " + Rd);
-                        
-            jfetTransferCharacteristicMake(1, 4.0, 26, -1.7372, 0, V_GSStep);
-            
+*/
+            // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)           
+            jfetTransferCharacteristicMake(0, V_DD, T, -3.0, 0, V_GSStep);
+/*            
             console.log(transferI_D);
             console.log(transferV_GS);
+*/
+
+
+            

@@ -11,7 +11,102 @@
     </head>
     <body>
 
-        No output yet.
 
+        <div style="width: 800px; height: 600px;">
+            <canvas id="jfet-transfer-characteristic"></canvas>
+            <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 43px;" min="-10" max="10" step="0.1" value="0">
+        </div>
     </body>
+    <scrip type="text/javascript">
+
+        <script>
+            const ctx = document.getElementById('jfet-transfer-characteristic');
+            const chart = new Chart(ctx, {
+              data: {
+                labels: transferV_GS,
+                datasets: [{
+                  type: 'line',
+                  label: 'JFET transfer characteristic',
+                  data: transferI_D,
+                  borderWidth: 1,
+                  pointRadius: 0
+                },{
+                  type: 'bubble',
+                  label: 'Q-point (optimum)',
+                  data: [{x: V_GS0, y: I_D0*1e3, r: 5}],
+                  borderWidth: 1,
+                },{
+                    type: 'line',
+                    label: '',
+                    data: [
+                        {x: V_GS0, y: 0},  
+                        {x: V_GS0, y: I_D0*1e3}  
+                    ],
+                    fill: false        
+                }
+                ,{
+                    type: 'line',
+                    label: '',
+                    data: [
+                        {x: V_GS0, y: I_D0*1e3}, 
+                        {x: 0, y: I_D0*1e3}  
+                    ],
+                    fill: false  
+                }                
+                ]
+              },
+              options: {
+                scales: {
+                    x: {
+                        beginAtZero: false, 
+                        type: 'linear', 
+                        title: {
+                        display: true,
+                        text: 'V_Gate-Source'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                            return value.toFixed(2); 
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                        display: true,
+                        text: 'I_Drain'
+                        }                
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: false 
+                    }
+                }
+              }
+            });
+
+            function updateChartData(changedV_GS) {         
+                newID_0 = solveI_D(V_DD, changedV_GS, T, jfetIndex)
+                chart.data.datasets[1].data = [{x: changedV_GS, y: newID_0*1e3, r: 5}];
+                chart.data.datasets[2].data = [{x: changedV_GS, y: 0}, {x: changedV_GS, y: newID_0*1e3}];
+                chart.data.datasets[3].data = [{x: changedV_GS, y: newID_0*1e3},{x: 0, y: newID_0*1e3}];
+                chart.update(); 
+            }
+
+
+            $(function() {
+                $('#rangeV_GS').width(750).attr('min', V_GSLow).attr('max', 0).attr('step', 'any').attr('value', V_GS0);
+                $('#rangeV_GS').on('change', function() {
+                    const value = $(this).val(); 
+                    updateChartData(value);
+                });
+
+
+            });
+
+          </script>
+
+
+    </scrip>
 </html>
