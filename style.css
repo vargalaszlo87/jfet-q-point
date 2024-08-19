@@ -1,0 +1,24 @@
+::range-progress {
+    background-color: #ededed;
+}
+
+/* span */
+
+body {
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    
+}
+
+span.value {
+    font-size: 1.3rem;
+}
+
+span.parameter {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+span.unit {
+    font-size: 1.3rem;
+}

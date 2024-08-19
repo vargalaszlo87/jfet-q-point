@@ -6,110 +6,41 @@
         <script type="text/javascript" src="assets/plugins/jquery-3.7.1.slim.min.js"></script>         
         <script type="text/javascript" src="assets/plugins/chart-4.4.3.min.js"></script>
         <!-- main -->
-        <script type="text/javascript" src="script.js"></script>
+
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
 
 
-        <div style="width: 800px; height: 600px;">
-            <canvas id="jfet-transfer-characteristic"></canvas>
-            <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 43px;" min="0" max="0" step="0.1" value="0">
+        <div style="width: 600px; height: 600px; float: left;">
+            <canvas id="jfet-transfer-characteristic" style="height: 600px"></canvas>
+            <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 50px;" min="0" max="0" step="0.1" value="0">
         </div>
+        <div style="float: left; line-height: 1.5">
+            <table>
+                <tr>
+                    <td><span class="parameter">Supply voltage:</span></td>
+                    <td><input type="range" id="rangeV_DD" style="width: 220px;" min="1" max="30" step="0.1" value="10"></td>
+                    <td><span id="valueOfRangeV_DD" class="value">10</span>&nbsp;<span class="unit">V</span></td>
+                </tr>
+                <tr>
+                    <td><span class="parameter">Input voltage:</span></td>
+                    <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="100"></td>
+                    <td><span id="valueOfRangeV_inp" class="value">100</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
+                </tr>
+                <tr>
+                    <td><span class="parameter">Gate-Source voltage:</span></td>
+                    <td><span id="valueOfV_GS0" class="value"></span>&nbsp;<span class="unit">V</span></td>
+                </tr>
+                <tr>
+                    <td><span class="parameter">Drain current:</span></td>
+                    <td><span id="valueOfI_D0" class="value"></span>&nbsp;<span class="unit">mA</span></td>
+                </tr>
+
+            </table>
+        </div>
+
+
     </body>
-    <scrip type="text/javascript">
-
-        <script>
-            const ctx = document.getElementById('jfet-transfer-characteristic');
-            const chart = new Chart(ctx, {
-              data: {
-                labels: transferV_GS,
-                datasets: [{
-                  type: 'line',
-                  label: 'JFET transfer characteristic',
-                  data: transferI_D,
-                  borderWidth: 1,
-                  pointRadius: 0
-                },{
-                  type: 'bubble',
-                  label: 'Q-point (optimum)',
-                  data: [{x: V_GS0, y: I_D0*1e3, r: 5}],
-                  borderWidth: 1,
-                },{
-                    type: 'line',
-                    label: '',
-                    data: [
-                        {x: V_GS0, y: 0},  
-                        {x: V_GS0, y: I_D0*1e3}  
-                    ],
-                    fill: false        
-                }
-                ,{
-                    type: 'line',
-                    label: '',
-                    data: [
-                        {x: V_GS0, y: I_D0*1e3}, 
-                        {x: 0, y: I_D0*1e3}  
-                    ],
-                    fill: false  
-                }                
-                ]
-              },
-              options: {
-                scales: {
-                    x: {
-                        beginAtZero: false, 
-                        type: 'linear', 
-                        title: {
-                        display: true,
-                        text: 'V_Gate-Source'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                            return value.toFixed(2); 
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                        display: true,
-                        text: 'I_Drain'
-                        }                
-                    },
-                },
-                plugins: {
-                    legend: {
-                        display: false 
-                    }
-                }
-              }
-            });
-
-            function updateChartData(changedV_GS) {         
-                newID_0 = solveI_D(V_DD, changedV_GS, T, jfetIndex)
-                chart.data.datasets[1].data = [{x: changedV_GS, y: newID_0*1e3, r: 5}];
-                chart.data.datasets[2].data = [{x: changedV_GS, y: 0}, {x: changedV_GS, y: newID_0*1e3}];
-                chart.data.datasets[3].data = [{x: changedV_GS, y: newID_0*1e3},{x: 0, y: newID_0*1e3}];
-                chart.update(); 
-                //const xScale = chart.scales.x;
-                //const xAxisWidth = xScale.width;
-                //console.log(xAxisWidth);
-            }
-
-
-            $(function() {
-                $('#rangeV_GS').width(750).attr('min', V_GSLow).attr('max', 0).attr('step', 'any').attr('value', V_GS0);
-                $('#rangeV_GS').on('change', function() {
-                    const value = $(this).val(); 
-                    updateChartData(value);
-                });
-
-
-            });
-
-          </script>
-
-
-    </scrip>
+    <script type="text/javascript" src="script.js"></script>
 </html>
