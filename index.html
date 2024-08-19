@@ -14,7 +14,7 @@
 
         <div style="width: 800px; height: 600px;">
             <canvas id="jfet-transfer-characteristic"></canvas>
-            <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 43px;" min="-10" max="10" step="0.1" value="0">
+            <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 43px;" min="0" max="0" step="0.1" value="0">
         </div>
     </body>
     <scrip type="text/javascript">
@@ -92,6 +92,9 @@
                 chart.data.datasets[2].data = [{x: changedV_GS, y: 0}, {x: changedV_GS, y: newID_0*1e3}];
                 chart.data.datasets[3].data = [{x: changedV_GS, y: newID_0*1e3},{x: 0, y: newID_0*1e3}];
                 chart.update(); 
+                //const xScale = chart.scales.x;
+                //const xAxisWidth = xScale.width;
+                //console.log(xAxisWidth);
             }
 
 
