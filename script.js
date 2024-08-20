@@ -19,6 +19,9 @@ var jfetName = [
 .MODEL BF256A NJF(VTO=-2.1333 BETA=1.06491m BETATCE=-0.5 LAMBDA=1.68673E-2 RD=1.41231E1 RS=1.41231E1 CGS=2.10000p CGD=2.30000p PB=7.73895E-1 IS=3.50865E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 */
+// default jfet
+var jfetIndex = 0;
+//params
 var jfet = [
     // sequence: BETA, BETAtce, Rd, Rs, LAMBDA, V_TO, V_TOtc
     [1.304e-3, -0.5, 1, 1, 2.25e-3, -3, -2.5e-3],
@@ -29,12 +32,12 @@ var jfet = [
     [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, 0],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, 0],
 ];
-    // solver	
+// solver	
 var solver = [
     1e-6, // tolerance
     100 // max iteration
 ];
-var V_GSLow = -3.0;
+var V_GSLow = jfet[jfetIndex][5];
 var V_GSUp = 0;
 var V_GSStep = 1e-2;
 var T_ref = 26.85;
@@ -51,10 +54,10 @@ var transferV_GS = [];
 var transferI_D = [];
 // simulation
 var T = 26.85;
-var V_DD = 20.0;
+var V_DD = 10.0;
 var V_inp = 100e-3;
 var V_GS0Changed = 0;
-var jfetIndex = 0;
+
 
 function jfetTransferCharacteristic(V_GS, V_DS, LAMBDA, BETA, V_TO) {
     return (V_GS < V_TO) ? 0.0 : ((BETA * Math.pow(V_GS - V_TO, 2)) * (1 + LAMBDA * V_DS));
@@ -305,7 +308,8 @@ function updateOptions() {
 function updateChart(V_DD) {
     // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)    
     transferI_D = [];   
-    jfetTransferCharacteristicMake(jfetIndex, V_DD, T, -3, 0, V_GSStep);
+    // -3.0 0
+    jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
     chart.data.datasets[0].data = transferI_D;
     chart.update();  
     // DEV : updateOptions();
@@ -352,12 +356,19 @@ function updateChartData(changedV_GS) {
 }
 
 $(function() {
+    // default values
     // drain current
     $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3).toFixed(2));    
     // gate-source voltage
     $("#valueOfV_GS0").text(V_GS0.toFixed(2));
     // gate-source voltage change    
     $('#rangeV_GS').width(550).attr('min', V_GSLow).attr('max', 0).attr('step', 'any').attr('value', V_GS0);
+    // types of jfet
+    for (let i = 0 ; i < jfetName.length ; i++) {
+        $('#jfetSelect').append(`<option value="${i}">${jfetName[i]}</option>`);
+    }
+
+    // changed values
     $('#rangeV_GS').on('change', function() {
         V_GS0Changed = $(this).val(); 
         updateChartData(V_GS0Changed);
@@ -378,6 +389,38 @@ $(function() {
         V_inp = $(this).val()*1e-3;
         $('#valueOfRangeV_inp').text($(this).val());
         updateChartData(V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed);
+    });
+    // jfet select
+    $("#jfetSelect").on('change', function () {
+        jfetIndex = $(this).val();
+        $("#rangeV_DD").prop('value',10.0);
+        $('#valueOfRangeV_DD').text( $("#rangeV_DD").val());
+        V_DD = 10.0;
+        $("#rangeV_inp").prop('value',100);
+        $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
+        V_inp = 100e-3;
+
+        //chart.options.scales.y.max = I_DSS * 1e3;
+        // (jfetIndex, V_DD, V_GS, Temperature)
+        transferV_GS = [];
+        transferI_D = [];
+        jfetQPointCalc(jfetIndex, V_DD, 0, T); 
+        // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)  
+        //V_GSLow = jfet[jfetIndex][5];         
+        jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
+        chart.options.scales.y.max = I_DSS * 1e3;
+        chart.options.scales.x.min = V_GSLow;
+        console.log(V_GS0, I_DSS * 1e3);   
+             
+        $("#rangeV_GS").prop('value',V_GS0);
+        updateChart(V_DD);
+        updateChartData(V_GS0);
+
+        //
+        // HIBA A VDD állításnál váltogatások után!
+        // Elmozgatja a munkapontot!
+        // Hiba a V_GSLow állításánál
+        //
 
     });
 
