@@ -1,5 +1,5 @@
 // calculating			
-            
+
 // models
 var jfetIndex = 0;
 var jfetName = [
@@ -48,13 +48,14 @@ var V_DS;
 var I_D0;
 var V_GS0;
 var Rs;
-var Rd;			
+var Rd;
 // transfer characteristic
 var transferV_GS = [];
 var transferI_D = [];
 // simulation
 var T = 26.85;
 var V_DD = 10.0;
+var V_DDmax = 30.0;
 var V_inp = 100e-3;
 var V_GS0Changed = 0;
 
@@ -72,7 +73,7 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         BETACorrected,
         iteration = 0,
 
-    // parameters of the transistor    
+        // parameters of the transistor    
         BETA = jfet[jfetIndex][0], // transcoductance parameter
         BETA_tce = jfet[jfetIndex][1] * 1e-2, // beta exponential temperature coeffitient [%/°C]
         R_D = jfet[jfetIndex][2], // drain ohmic resistance
@@ -112,24 +113,25 @@ function jfetQPointCalc(_jfetIndex, V_DD, V_GS, T) {
 function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, V_GSStep) {
     jfetIndex = _jfetIndex;
     // n channel
-    V_GSLow = _V_GSLow;
+    //V_GSLow = _V_GSLow;
     V_GSUp = _V_GSUp;
     let i = 0;
     let V_GSActucal;
-    for (V_GSActual = V_GSLow; V_GSActual <= V_GSUp; V_GSActual += V_GSStep) { 
-        transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex)*1e3);
+    for (V_GSActual = V_GSLow; V_GSActual <= V_GSUp; V_GSActual += V_GSStep) {
+        transferI_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex) * 1e3);
         transferV_GS.push(V_GSActual.toFixed(4)); // toFixed(4)
     }
     if (I_DSS == 0.0)
-            I_DSS = solveI_D(V_DD, 0, T, jfetIndex);					
-    if (transferI_D.slice(-1) < I_DSS*1e3) {
-        transferI_D.push(I_DSS*1e3);
+        I_DSS = solveI_D(V_DD, 0, T, jfetIndex);
+    if (transferI_D.slice(-1) < I_DSS * 1e3) {
+        transferI_D.push(I_DSS * 1e3);
         transferV_GS.push('0');
     }
 }
 
+
 // (jfetIndex, V_DD, V_GS, Temperature)
-jfetQPointCalc(0, V_DD, 0, T); 
+jfetQPointCalc(0, V_DD, 0, T);
 /*
 console.log("uds: " + V_DS);
 console.log("ugs0: " + V_GS0);
@@ -137,7 +139,8 @@ console.log("I_D0: " + I_D0);
 /*
 console.log("I_DSS: " + I_DSS);
 console.log("---");				
-*/console.log("RS: " + Rs);
+*/
+console.log("RS: " + Rs);
 console.log("RD: " + Rd);
 
 // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)           
@@ -151,205 +154,199 @@ console.log(transferV_GS);
 // drawing
 const ctx = document.getElementById('jfet-transfer-characteristic');
 const chart = new Chart(ctx, {
-  data: {
-    labels: transferV_GS,
-    datasets: [{
-      type: 'line',
-      label: 'JFET transfer characteristic',
-      data: transferI_D,
-      //borderWidth: 3,
-      borderColor: '#6699BB',
-      pointRadius: 0
-    },{
-      type: 'bubble',
-      label: 'Q-point (optimum)',
-//      data: [{x: V_GS0, y: I_D0*1e3, r: 5}],
-      data: [{x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3, r: 5}],
-      borderWidth: 1,
-      borderColor: '#ff0000',
-      backgroundColor: '#ff0000'
+    data: {
+        labels: transferV_GS,
+        datasets: [{
+                type: 'line',
+                label: 'JFET transfer characteristic',
+                data: transferI_D,
+                //borderWidth: 3,
+                borderColor: '#6699BB',
+                pointRadius: 0
+            }, {
+                type: 'bubble',
+                label: 'Q-point (optimum)',
+                //      data: [{x: V_GS0, y: I_D0*1e3, r: 5}],
+                data: [{ x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3, r: 5 }],
+                borderWidth: 1,
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000'
+            },
+            // up to the Q-point
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0, y: 0 },
+                    { x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3 }
+                ],
+                borderColor: '#52be80',
+                backgroundColor: '#52be80',
+                fill: false
+            },
+            // from the Q-point                
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3 },
+                    { x: 0, y: solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3 }
+                ],
+                borderColor: '#52be80',
+                backgroundColor: '#52be80',
+                fill: false
+            },
+            // left side
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0 - V_inp, y: 0 },
+                    { x: V_GS0 - V_inp, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex) * 1e3 }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            // right side
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0 + V_inp, y: 0 },
+                    { x: V_GS0 + V_inp, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex) * 1e3 }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            // top side
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0 + V_inp, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex) * 1e3 },
+                    { x: 0, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex) * 1e3 }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            // bottom side
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: V_GS0 - V_inp, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex) * 1e3 },
+                    { x: 0, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex) * 1e3 }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+        ]
     },
-    // up to the Q-point
-    {  
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0, y: 0},  
-            {x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3}  
-        ],
-        borderColor: '#52be80',
-        backgroundColor: '#52be80',
-        fill: false            
-    },
-    // from the Q-point                
-    {
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0, y: solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3}, 
-            {x: 0, y: solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3}  
-        ],
-        borderColor: '#52be80',
-        backgroundColor: '#52be80',        
-        fill: false  
-    },
-    // left side
-    {
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0 - V_inp, y :0},
-            {x: V_GS0 - V_inp, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex)*1e3}
-        ],
-        borderWidth: 1,
-        pointRadius: 0,
-        borderColor: '#616a6b',
-        borderDash: [8,2],
-        fill: false
-    },   
-    // right side
-    {
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0 + V_inp, y :0},
-            {x: V_GS0 + V_inp, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex)*1e3}
-        ],
-        borderWidth: 1,
-        pointRadius: 0,
-        borderColor: '#616a6b',
-        borderDash: [8,2],        
-        fill: false
-    },
-    // top side
-    {
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0 + V_inp, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex)*1e3}, 
-            {x: 0, y: solveI_D(V_DD, V_GS0 + V_inp, T, jfetIndex)*1e3}  
-        ],
-        borderWidth: 1,
-        pointRadius: 0,
-        borderColor: '#616a6b',
-        borderDash: [8,2],            
-        fill: false  
-    },
-    // bottom side
-    {
-        type: 'line',
-        label: '',
-        data: [
-            {x: V_GS0 - V_inp, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex)*1e3}, 
-            {x: 0, y: solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex)*1e3}  
-        ],
-        borderWidth: 1,
-        pointRadius: 0,
-        borderColor: '#616a6b',
-        borderDash: [8,2],            
-        fill: false  
-    },                      
-    ]
-  },
-  options: {
-    maintainAspectRatio: false,
-    scales: {
-        x: {
-            offset: false,
-            min: V_GSLow,
-            max: V_GSUp,
-            beginAtZero: false, 
-            type: 'linear', 
-            title: {
-            display: true,
-            text: 'Gate-Source voltage',
-                font: {
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                offset: false,
+                min: V_GSLow,
+                max: V_GSUp,
+                beginAtZero: false,
+                type: 'linear',
+                title: {
+                    display: true,
+                    text: 'Gate-Source voltage',
+                    font: {
                         weight: 'bold',
                         size: '14'
-                    }                        
+                    }
+                },
+                /*ticks: {
+                    callback: function(value) {
+                    return value.toFixed(2); 
+                    }
+                }*/
             },
-            /*ticks: {
-                callback: function(value) {
-                return value.toFixed(2); 
+            y: {
+                offset: false,
+                min: 0,
+                max: I_DSS * 1e3,
+                //max: solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3,
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Drain current',
+                    font: {
+                        weight: 'bold',
+                        size: '14'
+                    }
                 }
-            }*/
+            },
         },
-        y: {
-            offset: false,
-            min: 0,
-            max: I_DSS * 1e3,
-            beginAtZero: true,
-            title: {
-            display: true,
-            text: 'Drain current',
-                font: {
-                    weight: 'bold',
-                    size: '14'
-                }
-            }                
-        },
-    },
-    plugins: {
-        legend: {
-            display: false 
+        plugins: {
+            legend: {
+                display: false
+            }
         }
     }
-  }
 });
 
 // logic
 
-function updateOptions() {
-   // DEV
-   // chart.options.scales.y.max = I_DSS * 1e3;
-   // chart.update();
-}
 
 function updateChart(V_DD) {
-    // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)    
-    transferI_D = [];   
-    // -3.0 0
+    transferI_D = [];
+    jfetQPointCalc(jfetIndex, V_DD, 0, T);
     jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
     chart.data.datasets[0].data = transferI_D;
-    chart.update();  
-    // DEV : updateOptions();
+    chart.update();
 }
 
-function updateChartData(changedV_GS) {    
-    let 
-        tempBase, 
-        tempStatament, 
+function updateChartData(changedV_GS) {
+    let
+        tempBase,
+        tempStatament,
         tempCondition;
 
     newID_0 = solveI_D(V_DD, changedV_GS, T, jfetIndex);
-    chart.data.datasets[1].data = [{x: changedV_GS, y: newID_0*1e3, r: 5}];
-    chart.data.datasets[2].data = [{x: changedV_GS, y: 0}, {x: changedV_GS, y: newID_0*1e3}];
-    chart.data.datasets[3].data = [{x: changedV_GS, y: newID_0*1e3},{x: 0, y: newID_0*1e3}];
+    chart.data.datasets[1].data = [{ x: changedV_GS, y: newID_0 * 1e3, r: 5 }];
+    chart.data.datasets[2].data = [{ x: changedV_GS, y: 0 }, { x: changedV_GS, y: newID_0 * 1e3 }];
+    chart.data.datasets[3].data = [{ x: changedV_GS, y: newID_0 * 1e3 }, { x: 0, y: newID_0 * 1e3 }];
 
     // left
     tempBase = (changedV_GS - V_inp);
     tempCondition = tempBase > V_GSLow;
     tempStatament = tempCondition ? tempBase : V_GSLow;
-    chart.data.datasets[4].data = [{x: tempStatament, y: 0}, {x: tempStatament, y: solveI_D(V_DD, tempBase, T, jfetIndex)*1e3 }];
+    chart.data.datasets[4].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 }];
 
     // right
     tempBase = (Number(changedV_GS) + Number(V_inp));
     tempCondition = tempBase < V_GSUp;
     tempStatament = tempCondition ? (tempBase) : V_GSUp;
-    chart.data.datasets[5].data = [{x: tempStatament , y :0},{x: tempStatament, y: tempCondition ? solveI_D(V_DD, tempBase, T, jfetIndex)*1e3 : I_DSS }];
+    chart.data.datasets[5].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: tempCondition ? solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 : I_DSS }];
 
     // top side
     tempBase = Number(changedV_GS) + Number(V_inp);
     tempCondition = tempBase < I_DSS;
     tempStatament = tempCondition ? tempBase : 0;
-    tempI_D0Up = solveI_D(V_DD, tempStatament, T, jfetIndex)*1e3
-    chart.data.datasets[6].data = [{x: tempStatament , y : tempI_D0Up},{x: V_GSUp, y: tempI_D0Up}];
+    tempI_D0Up = solveI_D(V_DD, tempStatament, T, jfetIndex) * 1e3
+    chart.data.datasets[6].data = [{ x: tempStatament, y: tempI_D0Up }, { x: V_GSUp, y: tempI_D0Up }];
 
     // bottom side
-    chart.data.datasets[7].data = [{x: changedV_GS - V_inp , y :solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex)*1e3},{x: V_GSUp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex)*1e3}];
+    chart.data.datasets[7].data = [{ x: changedV_GS - V_inp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }, { x: V_GSUp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }];
 
 
-    chart.update();  
+    chart.update();
     //const xScale = chart.scales.x;
     //const xAxisWidth = xScale.width;
     //console.log(xAxisWidth);
@@ -358,67 +355,82 @@ function updateChartData(changedV_GS) {
 $(function() {
     // default values
     // drain current
-    $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex)*1e3).toFixed(2));    
+    $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
     // gate-source voltage
     $("#valueOfV_GS0").text(V_GS0.toFixed(2));
     // gate-source voltage change    
     $('#rangeV_GS').width(550).attr('min', V_GSLow).attr('max', 0).attr('step', 'any').attr('value', V_GS0);
     // types of jfet
-    for (let i = 0 ; i < jfetName.length ; i++) {
+    for (let i = 0; i < jfetName.length; i++) {
         $('#jfetSelect').append(`<option value="${i}">${jfetName[i]}</option>`);
     }
 
     // changed values
     $('#rangeV_GS').on('change', function() {
-        V_GS0Changed = $(this).val(); 
+        V_GS0Changed = $(this).val();
         updateChartData(V_GS0Changed);
         $("#valueOfV_GS0").text(Number(V_GS0Changed).toFixed(2));
-        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0Changed, T, jfetIndex)*1e3).toFixed(2));
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0Changed, T, jfetIndex) * 1e3).toFixed(2));
 
     });
     // supply voltage
     $("#rangeV_DD").on('change', function() {
-        V_DD = $(this).val(); 
+        V_DD = $(this).val();
         $('#valueOfRangeV_DD').text(V_DD);
         updateChart(V_DD);
-        updateChartData(V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed);
-        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed, T, jfetIndex)*1e3).toFixed(2));
-     });    
+        // VGS
+        tempVGS0 = V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed
+        updateChartData(tempVGS0);
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, tempVGS0, T, jfetIndex) * 1e3).toFixed(2));
+        $("#rangeV_GS").prop('value', tempVGS0);
+        chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
+        chart.update(); //  <-- ITT A dinamikus ID
+    });
     // input voltage
     $('#rangeV_inp').on('change', function() {
-        V_inp = $(this).val()*1e-3;
+        V_inp = $(this).val() * 1e-3;
         $('#valueOfRangeV_inp').text($(this).val());
-        updateChartData(V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed);
+        tempVGS0 = V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed
+        updateChartData(tempVGS0);
+        $("#rangeV_GS").prop('value', tempVGS0);
     });
     // jfet select
-    $("#jfetSelect").on('change', function () {
+    $("#jfetSelect").on('change', function() {
         jfetIndex = $(this).val();
-        $("#rangeV_DD").prop('value',10.0);
-        $('#valueOfRangeV_DD').text( $("#rangeV_DD").val());
+        //chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        // RESET ALL
+        $("#rangeV_DD").prop('value', 10.0);
+        $('#valueOfRangeV_DD').text($("#rangeV_DD").val());
         V_DD = 10.0;
-        $("#rangeV_inp").prop('value',100);
+        $("#rangeV_inp").prop('value', 100);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
         V_inp = 100e-3;
+        //transferV_GS = [];
+        //transferI_D = [];
+        while (transferV_GS.length > 0)
+            transferV_GS.pop();
+        while (transferI_D.length > 0)
+            transferI_D.pop();
 
-        //chart.options.scales.y.max = I_DSS * 1e3;
-        // (jfetIndex, V_DD, V_GS, Temperature)
-        transferV_GS = [];
-        transferI_D = [];
-        jfetQPointCalc(jfetIndex, V_DD, 0, T); 
-        // (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)  
-        //V_GSLow = jfet[jfetIndex][5];         
-        jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
-        chart.options.scales.y.max = I_DSS * 1e3;
-        chart.options.scales.x.min = V_GSLow;
-        console.log(V_GS0, I_DSS * 1e3);   
-             
-        $("#rangeV_GS").prop('value',V_GS0);
-        updateChart(V_DD);
+
+        //chart.options.scales.x.min = V_GSLow;
+        //chart.update();
+        console.log(V_GSLow);
+
+        // the point of V_GS range
+        jfetQPointCalc(jfetIndex, V_DD, 0, T);
+        $("#rangeV_GS").prop('value', V_GS0);
         updateChartData(V_GS0);
 
+        // transfer characteristic and axis and range
+        jfetTransferCharacteristicMake(jfetIndex, V_DD, T, jfet[jfetIndex][5], V_GSUp, V_GSStep);
+        chart.data.datasets[0].data = transferI_D;
+        chart.options.scales.x.min = jfet[jfetIndex][5];
+        $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
+        chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
+        chart.update();
+
         //
-        // HIBA A VDD állításnál váltogatások után!
-        // Elmozgatja a munkapontot!
         // Hiba a V_GSLow állításánál
         //
 
