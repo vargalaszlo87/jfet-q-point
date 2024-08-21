@@ -24,24 +24,35 @@
                         <select id="jfetSelect"></select>
                     </td>
                 </tr>
+                <tr><td colspan="3"><hr /></td></tr> 
                 <tr>
-                    <td><span class="parameter">Supply voltage:</span></td>
+                    <td><span class="parameter">Supply voltage</span><span class="sign">(V<sub>DD</sub>):</span></td>
                     <td><input type="range" id="rangeV_DD" style="width: 220px;" min="1" max="30" step="0.1" value="10"></td>
                     <td><span id="valueOfRangeV_DD" class="value">10</span>&nbsp;<span class="unit">V</span></td>
                 </tr>
                 <tr>
-                    <td><span class="parameter">Input voltage:</span></td>
+                    <td><span class="parameter">Input voltage</span><span class="sign">(V<sub>in</sub>):</span></td>
                     <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="100"></td>
                     <td><span id="valueOfRangeV_inp" class="value">100</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
                 </tr>
+                <tr><td colspan="3"><hr /></td></tr>                
                 <tr>
-                    <td><span class="parameter">Gate-Source voltage:</span></td>
+                    <td><span class="parameter">Gate-Source voltage</span><span class="sign">(V<sub>GS</sub>):</span></td>    
                     <td><span id="valueOfV_GS0" class="value"></span>&nbsp;<span class="unit">V</span></td>
                 </tr>
                 <tr>
-                    <td><span class="parameter">Drain current:</span></td>
+                    <td><span class="parameter">Drain current</span><span class="sign">(I<sub>D</sub>):</span></td>
                     <td><span id="valueOfI_D0" class="value"></span>&nbsp;<span class="unit">mA</span></td>
                 </tr>
+                <tr><td colspan="3"><hr /></td></tr>
+                <tr>
+                    <td><span class="parameter">Drain resistor</span><span class="sign">(R<sub>D</sub>):</span></td>
+                    <td><span id="valueOfR_D" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
+                </tr>
+                <tr>
+                    <td><span class="parameter">Source resistor</span><span class="sign">(R<sub>S</sub>):</span></td>
+                    <td><span id="valueOfR_S" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
+                </tr>                
 
             </table>
         </div>

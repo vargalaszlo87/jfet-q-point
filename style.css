@@ -19,6 +19,12 @@ span.parameter {
     font-weight: bold;
 }
 
+span.sign {
+    font-size: 1.0rem;
+    color: #666;
+    margin: 0 0.4rem;
+}
+
 span.unit {
     font-size: 1.3rem;
 }

@@ -25,12 +25,12 @@ var jfetIndex = 0;
 var jfet = [
     // sequence: BETA, BETAtce, Rd, Rs, LAMBDA, V_TO, V_TOtc
     [1.304e-3, -0.5, 1, 1, 2.25e-3, -3, -2.5e-3],
-    [1.16621e-3, -0.5, 9.01678, 9.01678, 1.77211e-2, -1.7372, 0],
-    [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, 0],
-    [5.43157e-4, -0.5, 1.20869e1, 1.20869e1, 2.71505e-2, -5.0014, 0],
-    [2.86527e-3, -0.5, 1.62278, 1.62278, 6.19323e-2, -5.3298, 0],
-    [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, 0],
-    [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, 0],
+    [1.16621e-3, -0.5, 9.01678, 9.01678, 1.77211e-2, -1.7372, -2.5e-3],
+    [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
+    [5.43157e-4, -0.5, 1.20869e1, 1.20869e1, 2.71505e-2, -5.0014, -2.5e-3],
+    [2.86527e-3, -0.5, 1.62278, 1.62278, 6.19323e-2, -5.3298, -2.5e-3],
+    [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3],
+    [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
 // solver	
 var solver = [
@@ -47,8 +47,8 @@ var m;
 var V_DS;
 var I_D0;
 var V_GS0;
-var Rs;
-var Rd;
+var R_S;
+var R_D;
 // transfer characteristic
 var transferV_GS = [];
 var transferI_D = [];
@@ -67,10 +67,11 @@ function jfetTransferCharacteristic(V_GS, V_DS, LAMBDA, BETA, V_TO) {
 function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
     let
     // calculating
+        V_DS = 0,
         I_DActual = 0.0,
-        I_DPrevius,
-        V_TOCorrected,
-        BETACorrected,
+        I_DPrevius = 0,
+        V_TOCorrected = 0,
+        BETACorrected = 0,
         iteration = 0,
 
         // parameters of the transistor    
@@ -106,8 +107,8 @@ function jfetQPointCalc(_jfetIndex, V_DD, V_GS, T) {
     V_DS = ((V_DD - Math.abs(jfet[jfetIndex][5])) / 2) + Math.abs(jfet[jfetIndex][5]);
     I_D0 = I_DSS - Math.abs(m) * V_DS;
     V_GS0 = jfet[jfetIndex][5] + Math.sqrt(I_D0 / (jfet[jfetIndex][0] * (1 + jfet[jfetIndex][4] * V_DS)));
-    Rs = Math.abs(V_GS0 / I_D0);
-    Rd = (V_DD - V_DS - Math.abs(V_GS0)) / I_D0;
+    R_S = Math.abs(V_GS0 / I_D0);
+    R_D = (V_DD - V_DS - Math.abs(V_GS0)) / I_D0;
 }
 
 function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, V_GSStep) {
@@ -129,10 +130,16 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
     }
 }
 
+
 // default display
 
 jfetQPointCalc(0, V_DD, 0, T);       
 jfetTransferCharacteristicMake(0, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
+
+
+updateResistor();
+
+//console.log("I_DSS: " + I_DSS + "\nV_DS:" + V_DS + "\nI_D0: " + I_D0 + "\nV_GS0:" + V_GS0 + "\nR_S: " + R_S + "\nR_D: " + R_D);
 
 // drawing
 const ctx = document.getElementById('jfet-transfer-characteristic');
@@ -288,7 +295,7 @@ const chart = new Chart(ctx, {
 
 function updateChart(V_DD) {
     transferI_D = [];
-    jfetQPointCalc(jfetIndex, V_DD, 0, T);
+    //jfetQPointCalc(jfetIndex, V_DD, 0, T);
     jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
     chart.data.datasets[0].data = transferI_D;
     chart.update();
@@ -299,6 +306,9 @@ function updateChartData(changedV_GS) {
         tempBase,
         tempStatament,
         tempCondition;
+
+    for (let i = 1 ; i <= 7 ; i++ )
+    chart.data.datasets[i].data = [];
 
     newID_0 = solveI_D(V_DD, changedV_GS, T, jfetIndex);
     chart.data.datasets[1].data = [{ x: changedV_GS, y: newID_0 * 1e3, r: 5 }];
@@ -334,6 +344,13 @@ function updateChartData(changedV_GS) {
     //console.log(xAxisWidth);
 }
 
+function updateResistor() {
+    tempID_0 = solveI_D(V_DD, V_GS0, T, jfetIndex);
+    R_S = Math.abs(V_GS0 / tempID_0);
+    R_D = (V_DD - V_DS - Math.abs(V_GS0)) / tempID_0; 
+    $("#valueOfR_S").text(R_S.toFixed(2));
+    $("#valueOfR_D").text(R_D.toFixed(2));    
+}
 $(function() {
     // default values
     // drain current
@@ -346,14 +363,14 @@ $(function() {
     for (let i = 0; i < jfetName.length; i++) {
         $('#jfetSelect').append(`<option value="${i}">${jfetName[i]}</option>`);
     }
-
     // changed values
     $('#rangeV_GS').on('change', function() {
         V_GS0Changed = $(this).val();
-        updateChartData(V_GS0Changed);
-        $("#valueOfV_GS0").text(Number(V_GS0Changed).toFixed(2));
-        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0Changed, T, jfetIndex) * 1e3).toFixed(2));
-
+        V_GS0 = V_GS0Changed;
+        updateChartData(V_GS0);
+        $("#valueOfV_GS0").text(Number(V_GS0).toFixed(2));
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
+        updateResistor();
     });
     // supply voltage
     $("#rangeV_DD").on('change', function() {
@@ -361,20 +378,19 @@ $(function() {
         $('#valueOfRangeV_DD').text(V_DD);
         updateChart(V_DD);
         // VGS
-        tempVGS0 = V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed
-        updateChartData(tempVGS0);
-        $("#valueOfI_D0").text(Number(solveI_D(V_DD, tempVGS0, T, jfetIndex) * 1e3).toFixed(2));
-        $("#rangeV_GS").prop('value', tempVGS0);
+        updateChartData(V_GS0);
+        $("#rangeV_GS").prop('value', V_GS0);
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update(); //  <-- ITT A dinamikus ID
+        updateResistor();
     });
     // input voltage
     $('#rangeV_inp').on('change', function() {
         V_inp = $(this).val() * 1e-3;
-        $('#valueOfRangeV_inp').text($(this).val());
-        tempVGS0 = V_GS0Changed == 0.0 ? V_GS0 : V_GS0Changed
-        updateChartData(tempVGS0);
-        $("#rangeV_GS").prop('value', tempVGS0);
+        $('#valueOfRangeV_inp').text(V_inp);
+        updateChartData(V_GS0);
+        $("#rangeV_GS").prop('value', V_GS0);
     });
     // jfet select
     $("#jfetSelect").on('change', function() {
@@ -392,12 +408,11 @@ $(function() {
             transferV_GS.pop();
         while (transferI_D.length > 0)
             transferI_D.pop();
-
         // the point of V_GS range
         jfetQPointCalc(jfetIndex, V_DD, 0, T);
         $("#rangeV_GS").prop('value', V_GS0);
         updateChartData(V_GS0);
-
+        console.log("valtas: " + V_GS0);      
         // transfer characteristic and axis and range
         jfetTransferCharacteristicMake(jfetIndex, V_DD, T, jfet[jfetIndex][5], V_GSUp, V_GSStep);
         chart.data.datasets[0].data = transferI_D;
@@ -405,10 +420,10 @@ $(function() {
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update();
+        updateResistor();          
         // refreshing the "default" values
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         $("#valueOfV_GS0").text(V_GS0.toFixed(2));
-
     });
 
 });
