@@ -113,7 +113,7 @@ function jfetQPointCalc(_jfetIndex, V_DD, V_GS, T) {
 function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, V_GSStep) {
     jfetIndex = _jfetIndex;
     // n channel
-    //V_GSLow = _V_GSLow;
+    V_GSLow = _V_GSLow;
     V_GSUp = _V_GSUp;
     let i = 0;
     let V_GSActucal;
@@ -129,27 +129,10 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
     }
 }
 
+// default display
 
-// (jfetIndex, V_DD, V_GS, Temperature)
-jfetQPointCalc(0, V_DD, 0, T);
-/*
-console.log("uds: " + V_DS);
-console.log("ugs0: " + V_GS0);
-console.log("I_D0: " + I_D0);
-/*
-console.log("I_DSS: " + I_DSS);
-console.log("---");				
-*/
-console.log("RS: " + Rs);
-console.log("RD: " + Rd);
-
-// (jfetIndex, V_DD, Temperature, V_GSLow, V_GSUp, V_GSStep)           
+jfetQPointCalc(0, V_DD, 0, T);       
 jfetTransferCharacteristicMake(0, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
-/*            
-console.log(transferI_D);
-console.log(transferV_GS);
-*/
-
 
 // drawing
 const ctx = document.getElementById('jfet-transfer-characteristic');
@@ -303,7 +286,6 @@ const chart = new Chart(ctx, {
 
 // logic
 
-
 function updateChart(V_DD) {
     transferI_D = [];
     jfetQPointCalc(jfetIndex, V_DD, 0, T);
@@ -345,7 +327,7 @@ function updateChartData(changedV_GS) {
     // bottom side
     chart.data.datasets[7].data = [{ x: changedV_GS - V_inp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }, { x: V_GSUp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }];
 
-
+    // update
     chart.update();
     //const xScale = chart.scales.x;
     //const xAxisWidth = xScale.width;
@@ -405,17 +387,11 @@ $(function() {
         $("#rangeV_inp").prop('value', 100);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
         V_inp = 100e-3;
-        //transferV_GS = [];
-        //transferI_D = [];
+        // pop all items
         while (transferV_GS.length > 0)
             transferV_GS.pop();
         while (transferI_D.length > 0)
             transferI_D.pop();
-
-
-        //chart.options.scales.x.min = V_GSLow;
-        //chart.update();
-        console.log(V_GSLow);
 
         // the point of V_GS range
         jfetQPointCalc(jfetIndex, V_DD, 0, T);
@@ -429,10 +405,9 @@ $(function() {
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update();
-
-        //
-        // Hiba a V_GSLow állításánál
-        //
+        // refreshing the "default" values
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
+        $("#valueOfV_GS0").text(V_GS0.toFixed(2));
 
     });
 
