@@ -33,6 +33,10 @@ var jfet = [
     [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
+// E24
+var e24 = [
+    1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1
+];
 // solver	
 var solver = [
     1e-6, // tolerance
@@ -354,12 +358,33 @@ function updateChartData(changedV_GS) {
     //console.log(xAxisWidth);
 }
 
+function searchInE24(resistor) {
+    let digits = resistor.toFixed(0).toString().length;
+    diff = [];
+    let i = 0;
+    for (i = 0 ; i < e24.length ; i++) {
+        diff.push(Math.abs(e24[i]*Math.pow(10,digits - 1) - resistor));
+    }
+    let temp = (e24[diff.indexOf(Math.min(...diff))]*Math.pow(10,digits-1)).toFixed(0);
+    if (temp >= 1e3)
+        temp = (temp / 1e3).toString() + "k"; 
+    if (temp >= 1e6)
+        temp = (temp / 1e6).toString() + "M"; 
+    return (temp);
+}
+
 function updateResistor() {
     tempID_0 = solveI_D(V_DD, V_GS0, T, jfetIndex);
+    // calc the resistances
     R_S = Math.abs(V_GS0 / tempID_0);
     R_D = (V_DD - V_DS - Math.abs(V_GS0)) / tempID_0; 
     $("#valueOfR_S").text(R_S.toFixed(2));
     $("#valueOfR_D").text(R_D.toFixed(2));    
+    // search in E24
+    let E24R_S = searchInE24(R_S); 
+    let E24R_D = searchInE24(R_D); 
+    $("#valueOfR_SInE24").text(E24R_S);
+    $("#valueOfR_DInE24").text(E24R_D);
 }
 $(function() {
     // default values
@@ -407,9 +432,7 @@ $(function() {
         jfetIndex = $(this).val();
         V_GSLow = jfet[jfetIndex][5];        
         //chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
-        //chart.options.scales.x.min = jfet[jfetIndex][5];
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
-        //chart.update();
         // RESET ALL
         $("#rangeV_DD").prop('value', 10.0);
         $('#valueOfRangeV_DD').text($("#rangeV_DD").val());
@@ -431,7 +454,6 @@ $(function() {
         jfetTransferCharacteristicMake(jfetIndex, V_DD, T, jfet[jfetIndex][5], V_GSUp, V_GSStep);
         chart.data.datasets[0].data = transferI_D;
         chart.options.scales.x.min = jfet[jfetIndex][5];
-        //$('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update();
         updateResistor();          
