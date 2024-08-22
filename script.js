@@ -4,18 +4,19 @@
 var jfetIndex = 0;
 var jfetName = [
     "2N3819",
+    "2N5434",
     "BF245A",
     "BF245B",
     "BF245C",
-    "BF246A",
     "BF256A",
     "BF259B"
 ];
 /*
+.model 2N3819 NJF(Beta=1.304m Betatce=-.5 Rd=1 Rs=1 Lambda=2.25m Vto=-3 Vtotc=-2.5m Is=33.57f Isr=322.4f N=1 Nr=2 Xti=3 Alpha=311.7u Vk=243.6 Cgd=1.6p M=.3622 Pb=1 Fc=.5 Cgs=2.414p Kf=9.882E-18 Af=1 mfg=Vishay)
+.model 2N5434 NJF(Beta=18m Betatce=-.5    Rd=1 Rs=1 Lambda=25m Vto=-1.9 Vtotc=-2.5m Is=.5p Isr=5p Alpha=150u Vk=110 Cgd=35p M=.4283 Cgs=35p mfg=Vishay)
 .MODEL BF245A NJF(VTO=-1.7372 BETA=1.16621m BETATCE=-0.5 LAMBDA=1.77211E-2 RD=9.01678 RS=9.01678 CGS=2.20000p CGD=2.20000p PB=7.80988E-1 IS=2.91797E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF245B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF245C NJF(VTO=-5.0014 BETA=5.43157E-4 BETATCE=-0.5 LAMBDA=2.71505E-2 RD=1.20869E1 RS=1.20869E1 CGS=2.00000p CGD=2.00000p PB=1.24659 IS=3.64346E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-.MODEL BF246A NJF(VTO=-5.3298 BETA=2.86527m BETATCE=-0.5 LAMBDA=6.19323E-2 RD=1.62278 RS=1.62278 CGS=1.05000E-11 CGD=1.30000E-11 PB=7.98217E-1 IS=1.18582f XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF256A NJF(VTO=-2.1333 BETA=1.06491m BETATCE=-0.5 LAMBDA=1.68673E-2 RD=1.41231E1 RS=1.41231E1 CGS=2.10000p CGD=2.30000p PB=7.73895E-1 IS=3.50865E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 */
@@ -25,10 +26,10 @@ var jfetIndex = 0;
 var jfet = [
     // sequence: BETA, BETAtce, Rd, Rs, LAMBDA, V_TO, V_TOtc
     [1.304e-3, -0.5, 1, 1, 2.25e-3, -3, -2.5e-3],
+    [18e-3, -0.5, 1, 1, 25e-3, -1.9, -2.5e-3],
     [1.16621e-3, -0.5, 9.01678, 9.01678, 1.77211e-2, -1.7372, -2.5e-3],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
     [5.43157e-4, -0.5, 1.20869e1, 1.20869e1, 2.71505e-2, -5.0014, -2.5e-3],
-    [2.86527e-3, -0.5, 1.62278, 1.62278, 6.19323e-2, -5.3298, -2.5e-3],
     [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
@@ -245,6 +246,9 @@ const chart = new Chart(ctx, {
         ]
     },
     options: {
+        animation: {
+            duration: 300
+        },
         maintainAspectRatio: false,
         scales: {
             x: {
@@ -315,18 +319,24 @@ function updateChartData(changedV_GS) {
     chart.data.datasets[2].data = [{ x: changedV_GS, y: 0 }, { x: changedV_GS, y: newID_0 * 1e3 }];
     chart.data.datasets[3].data = [{ x: changedV_GS, y: newID_0 * 1e3 }, { x: 0, y: newID_0 * 1e3 }];
 
+    console.log("--------");
     // left
-    tempBase = (changedV_GS - V_inp);
+    tempBase = (Number(changedV_GS) - Number(V_inp));
     tempCondition = tempBase > V_GSLow;
     tempStatament = tempCondition ? tempBase : V_GSLow;
     chart.data.datasets[4].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 }];
+    console.log("tempBase: " + tempBase);
+    console.log("tempCondition: " + tempCondition);
+    console.log("tempStatament: " + tempStatament);   
+    console.log("V_GSLow: " + V_GSLow);
+    
 
     // right
     tempBase = (Number(changedV_GS) + Number(V_inp));
     tempCondition = tempBase < V_GSUp;
     tempStatament = tempCondition ? (tempBase) : V_GSUp;
     chart.data.datasets[5].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: tempCondition ? solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 : I_DSS }];
-
+ 
     // top side
     tempBase = Number(changedV_GS) + Number(V_inp);
     tempCondition = tempBase < I_DSS;
@@ -388,14 +398,18 @@ $(function() {
     // input voltage
     $('#rangeV_inp').on('change', function() {
         V_inp = $(this).val() * 1e-3;
-        $('#valueOfRangeV_inp').text(V_inp);
+        $('#valueOfRangeV_inp').text((V_inp * 1e3).toFixed(0));
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
     });
     // jfet select
     $("#jfetSelect").on('change', function() {
         jfetIndex = $(this).val();
+        V_GSLow = jfet[jfetIndex][5];        
         //chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        //chart.options.scales.x.min = jfet[jfetIndex][5];
+        $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
+        //chart.update();
         // RESET ALL
         $("#rangeV_DD").prop('value', 10.0);
         $('#valueOfRangeV_DD').text($("#rangeV_DD").val());
@@ -409,21 +423,22 @@ $(function() {
         while (transferI_D.length > 0)
             transferI_D.pop();
         // the point of V_GS range
+        V_GS0 = 0;
         jfetQPointCalc(jfetIndex, V_DD, 0, T);
         $("#rangeV_GS").prop('value', V_GS0);
         updateChartData(V_GS0);
-        console.log("valtas: " + V_GS0);      
         // transfer characteristic and axis and range
         jfetTransferCharacteristicMake(jfetIndex, V_DD, T, jfet[jfetIndex][5], V_GSUp, V_GSStep);
         chart.data.datasets[0].data = transferI_D;
         chart.options.scales.x.min = jfet[jfetIndex][5];
-        $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
+        //$('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update();
         updateResistor();          
         // refreshing the "default" values
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         $("#valueOfV_GS0").text(V_GS0.toFixed(2));
+
     });
 
 });
