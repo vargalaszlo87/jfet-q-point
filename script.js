@@ -33,6 +33,16 @@ var jfet = [
     [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
+var 
+    BETA,
+    BETA_tce,
+    BETACorrected,
+    R_D,
+    R_S,
+    LAMBDA,
+    V_TO,
+    V_TOtc,
+    V_TOCorrected;
 // E24
 var e24 = [
     1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1
@@ -75,9 +85,9 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         V_DS = 0,
         I_DActual = 0.0,
         I_DPrevius = 0,
-        V_TOCorrected = 0,
-        BETACorrected = 0,
-        iteration = 0,
+        //V_TOCorrected = 0,
+        //BETACorrected = 0,
+        iteration = 0;
 
         // parameters of the transistor    
         BETA = jfet[jfetIndex][0], // transcoductance parameter
@@ -301,7 +311,7 @@ const chart = new Chart(ctx, {
 
 // logic
 
-function updateChart(V_DD) {
+function updateChart(/*V_DD*/) {
     transferI_D = [];
     //jfetQPointCalc(jfetIndex, V_DD, 0, T);
     jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
@@ -411,14 +421,29 @@ $(function() {
     $("#rangeV_DD").on('change', function() {
         V_DD = $(this).val();
         $('#valueOfRangeV_DD').text(V_DD);
-        updateChart(V_DD);
+        updateChart();
         // VGS
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
-        chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
+        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
         chart.update(); //  <-- ITT A dinamikus ID
         updateResistor();
+    });
+    // changed ambient temperature
+    $("#rangeT").on('change', function() {
+        T = $(this).val();
+        $('#valueOfRangeT').text(T);
+        updateChart();
+        // VGS
+        updateChartData(V_GS0);
+        $("#rangeV_GS").prop('value', V_GS0);
+        $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
+        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        chart.update(); //  <-- ITT A dinamikus ID
+        updateResistor();        
     });
     // input voltage
     $('#rangeV_inp').on('change', function() {
@@ -426,17 +451,33 @@ $(function() {
         $('#valueOfRangeV_inp').text((V_inp * 1e3).toFixed(0));
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
+
+
+
+
+        // teszt
+        gm = 2 * BETACorrected*(1+LAMBDA*V_DS)*(V_GS0-V_TOCorrected);
+        y22s = I_DSS / V_DS;
+        console.log(V_DS + " " + gm + " " + y22s);
+
+
     });
     // jfet select
     $("#jfetSelect").on('change', function() {
         jfetIndex = $(this).val();
         V_GSLow = jfet[jfetIndex][5];        
-        //chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         // RESET ALL
+        // V_DD
         $("#rangeV_DD").prop('value', 10.0);
         $('#valueOfRangeV_DD').text($("#rangeV_DD").val());
         V_DD = 10.0;
+        // T
+        $("#rangeT").prop('value', 26.85);
+        T = 26.85;
+        $('#valueOfRangeT').text(T);
+        // V_inp
         $("#rangeV_inp").prop('value', 100);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
         V_inp = 100e-3;

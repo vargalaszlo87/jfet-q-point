@@ -31,10 +31,10 @@
                     <td><span id="valueOfRangeV_DD" class="value">10</span>&nbsp;<span class="unit">V</span></td>
                 </tr>
                 <tr>
-                    <td><span class="parameter">Input voltage</span><span class="sign">(V<sub>in</sub>):</span></td>
-                    <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="100"></td>
-                    <td><span id="valueOfRangeV_inp" class="value">100</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
-                </tr>
+                    <td><span class="parameter">Ambient temperature</span><span class="sign">(T<sub>AMB</sub>):</span></td>
+                    <td><input type="range" id="rangeT" style="width: 220px;" min="-20" max="80" step="0.1" value="26.85"></td>
+                    <td><span id="valueOfRangeT" class="value">26.85</span>&nbsp;<span class="unit">°C</span></td>
+                </tr>                
                 <tr><td colspan="3"><hr /></td></tr>                
                 <tr>
                     <td><span class="parameter">Gate-Source voltage</span><span class="sign">(V<sub>GS</sub>):</span></td>    
@@ -44,7 +44,6 @@
                     <td><span class="parameter">Drain current</span><span class="sign">(I<sub>D</sub>):</span></td>
                     <td><span id="valueOfI_D0" class="value"></span>&nbsp;<span class="unit">mA</span></td>
                 </tr>
-                <tr><td colspan="3"><hr /></td></tr>
                 <tr>
                     <td><span class="parameter">Drain resistor</span><span class="sign">(R<sub>D</sub>):</span></td>
                     <td><span id="valueOfR_D" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
@@ -55,6 +54,21 @@
                     <td><span id="valueOfR_S" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
                     <td><span id="valueOfR_SInE24" class="value"></span><span class="unit">Ω</span><sub>E24</sub></td>
                 </tr>                
+                <tr><td colspan="3"><hr /></td></tr>
+                <tr>
+                    <td><span class="parameter">Input voltage</span><span class="sign">(V<sub>in</sub>):</span></td>
+                    <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="100"></td>
+                    <td><span id="valueOfRangeV_inp" class="value">100</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
+                </tr>
+                <!--<tr>
+                    <td><span class="parameter">Type of Amplifier:</span></td>
+                    <td>
+                        <select id="amplifierSelect">
+                            <option value="0">Common Source</option>
+                            <option value="1">Common Drain</option>
+                        </select>
+                    </td>
+                </tr>-->
 
             </table>
         </div>
