@@ -37,8 +37,8 @@ var
     BETA,
     BETA_tce,
     BETACorrected,
-    R_D,
-    R_S,
+    //R_D,
+    //R_S,
     LAMBDA,
     V_TO,
     V_TOtc,
@@ -90,12 +90,12 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         iteration = 0;
 
         // parameters of the transistor    
-        BETA = jfet[jfetIndex][0], // transcoductance parameter
-        BETA_tce = jfet[jfetIndex][1] * 1e-2, // beta exponential temperature coeffitient [%/°C]
-        R_D = jfet[jfetIndex][2], // drain ohmic resistance
-        R_S = jfet[jfetIndex][3], // source ohmic resistance
-        LAMBDA = jfet[jfetIndex][4], // chanel-lengt modulation
-        V_TO = jfet[jfetIndex][5], // threshold voltage
+        BETA = jfet[jfetIndex][0]; // transcoductance parameter
+        BETA_tce = jfet[jfetIndex][1] * 1e-2; // beta exponential temperature coeffitient [%/°C]
+        let R_D = jfet[jfetIndex][2]; // drain ohmic resistance
+        let R_S = jfet[jfetIndex][3]; // source ohmic resistance
+        LAMBDA = jfet[jfetIndex][4]; // chanel-lengt modulation
+        V_TO = jfet[jfetIndex][5]; // threshold voltage
         V_TOtc = jfet[jfetIndex][6]; // V_TO temperature coeffitient [V/°C^-1]
 
     // correction
@@ -333,17 +333,11 @@ function updateChartData(changedV_GS) {
     chart.data.datasets[2].data = [{ x: changedV_GS, y: 0 }, { x: changedV_GS, y: newID_0 * 1e3 }];
     chart.data.datasets[3].data = [{ x: changedV_GS, y: newID_0 * 1e3 }, { x: 0, y: newID_0 * 1e3 }];
 
-    console.log("--------");
     // left
     tempBase = (Number(changedV_GS) - Number(V_inp));
     tempCondition = tempBase > V_GSLow;
     tempStatament = tempCondition ? tempBase : V_GSLow;
     chart.data.datasets[4].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 }];
-    console.log("tempBase: " + tempBase);
-    console.log("tempCondition: " + tempCondition);
-    console.log("tempStatament: " + tempStatament);   
-    console.log("V_GSLow: " + V_GSLow);
-    
 
     // right
     tempBase = (Number(changedV_GS) + Number(V_inp));
@@ -458,7 +452,9 @@ $(function() {
         // teszt
         gm = 2 * BETACorrected*(1+LAMBDA*V_DS)*(V_GS0-V_TOCorrected);
         y22s = I_DSS / V_DS;
-        console.log(V_DS + " " + gm + " " + y22s);
+        y22s = 25e-6;
+        Au = -gm * (1/((1/(1/y22s)) + (1/R_D) + (1/10000)));
+        console.log("Au: ", Au);
 
 
     });
