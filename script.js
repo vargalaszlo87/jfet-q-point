@@ -1,6 +1,17 @@
 // calculating			
 
 // models
+
+/*
+.model 2N3819 NJF(Beta=1.304m Betatce=-.5 Rd=1 Rs=1 Lambda=2.25m Vto=-3 Vtotc=-2.5m Is=33.57f Isr=322.4f N=1 Nr=2 Xti=3 Alpha=311.7u Vk=243.6 Cgd=1.6p M=.3622 Pb=1 Fc=.5 Cgs=2.414p Kf=9.882E-18 Af=1 mfg=Vishay)
+.model 2N5434 NJF(Beta=18m Betatce=-.5    Rd=1 Rs=1 Lambda=25m Vto=-1.9 Vtotc=-2.5m Is=.5p Isr=5p Alpha=150u Vk=110 Cgd=35p M=.4283 Cgs=35p mfg=Vishay)
+.MODEL BF245A NJF(VTO=-1.7372 BETA=1.16621m BETATCE=-0.5 LAMBDA=1.77211E-2 RD=9.01678 RS=9.01678 CGS=2.20000p CGD=2.20000p PB=7.80988E-1 IS=2.91797E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
+.MODEL BF245B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
+.MODEL BF245C NJF(VTO=-5.0014 BETA=5.43157E-4 BETATCE=-0.5 LAMBDA=2.71505E-2 RD=1.20869E1 RS=1.20869E1 CGS=2.00000p CGD=2.00000p PB=1.24659 IS=3.64346E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
+.MODEL BF256A NJF(VTO=-2.1333 BETA=1.06491m BETATCE=-0.5 LAMBDA=1.68673E-2 RD=1.41231E1 RS=1.41231E1 CGS=2.10000p CGD=2.30000p PB=7.73895E-1 IS=3.50865E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
+.MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
+*/
+
 var jfetIndex = 0;
 var jfetName = [
     "2N3819",
@@ -11,15 +22,6 @@ var jfetName = [
     "BF256A",
     "BF259B"
 ];
-/*
-.model 2N3819 NJF(Beta=1.304m Betatce=-.5 Rd=1 Rs=1 Lambda=2.25m Vto=-3 Vtotc=-2.5m Is=33.57f Isr=322.4f N=1 Nr=2 Xti=3 Alpha=311.7u Vk=243.6 Cgd=1.6p M=.3622 Pb=1 Fc=.5 Cgs=2.414p Kf=9.882E-18 Af=1 mfg=Vishay)
-.model 2N5434 NJF(Beta=18m Betatce=-.5    Rd=1 Rs=1 Lambda=25m Vto=-1.9 Vtotc=-2.5m Is=.5p Isr=5p Alpha=150u Vk=110 Cgd=35p M=.4283 Cgs=35p mfg=Vishay)
-.MODEL BF245A NJF(VTO=-1.7372 BETA=1.16621m BETATCE=-0.5 LAMBDA=1.77211E-2 RD=9.01678 RS=9.01678 CGS=2.20000p CGD=2.20000p PB=7.80988E-1 IS=2.91797E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-.MODEL BF245B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-.MODEL BF245C NJF(VTO=-5.0014 BETA=5.43157E-4 BETATCE=-0.5 LAMBDA=2.71505E-2 RD=1.20869E1 RS=1.20869E1 CGS=2.00000p CGD=2.00000p PB=1.24659 IS=3.64346E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-.MODEL BF256A NJF(VTO=-2.1333 BETA=1.06491m BETATCE=-0.5 LAMBDA=1.68673E-2 RD=1.41231E1 RS=1.41231E1 CGS=2.10000p CGD=2.30000p PB=7.73895E-1 IS=3.50865E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-.MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
-*/
 // default jfet
 var jfetIndex = 0;
 //params
@@ -33,7 +35,7 @@ var jfet = [
     [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3],
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
-var 
+var
     BETA,
     BETA_tce,
     BETACorrected,
@@ -42,7 +44,18 @@ var
     LAMBDA,
     V_TO,
     V_TOtc,
-    V_TOCorrected;
+    V_TOCorrected,
+    y_21s,
+    y_22s,
+    r_0;
+var
+    Z_load = 10e3,
+    Z_in = 1e6,
+    Z_out = 0,
+    Z_out_eff = 0,
+    C_s = 10e-6,
+    C_in = 1e-6,
+    C_out = 1e-6;
 // E24
 var e24 = [
     1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1
@@ -52,28 +65,35 @@ var solver = [
     1e-6, // tolerance
     100 // max iteration
 ];
-var V_GSLow = jfet[jfetIndex][5];
-var V_GSUp = 0;
-var V_GSStep = 1e-2;
-var T_ref = 26.85;
+var
+    V_GSLow = jfet[jfetIndex][5],
+    V_GSUp = 0,
+    V_GSStep = 1e-2,
+    T_ref = 26.85;
 // calculated values
-var I_DSS = 0.0;
-var m;
-var V_DS;
-var I_D0;
-var V_GS0;
-var R_S;
-var R_D;
+var
+    I_DSS = 0.0,
+    m,
+    V_DS,
+    I_D0,
+    V_GS0,
+    R_S,
+    R_D,
+    A_v,
+    A_i;
 // transfer characteristic
-var transferV_GS = [];
-var transferI_D = [];
+var
+    transferV_GS = [],
+    transferI_D = [];
 // simulation
-var T = 26.85;
-var V_DD = 10.0;
-var V_DDmax = 30.0;
-var V_inp = 100e-3;
-var V_GS0Changed = 0;
-
+var
+    amp = 0,
+    inverted = true,
+    T = 26.85,
+    V_DD = 10.0,
+    V_DDmax = 30.0,
+    V_inp = 100e-3,
+    V_GS0Changed = 0;
 
 function jfetTransferCharacteristic(V_GS, V_DS, LAMBDA, BETA, V_TO) {
     return (V_GS < V_TO) ? 0.0 : ((BETA * Math.pow(V_GS - V_TO, 2)) * (1 + LAMBDA * V_DS));
@@ -89,14 +109,14 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         //BETACorrected = 0,
         iteration = 0;
 
-        // parameters of the transistor    
-        BETA = jfet[jfetIndex][0]; // transcoductance parameter
-        BETA_tce = jfet[jfetIndex][1] * 1e-2; // beta exponential temperature coeffitient [%/°C]
-        let R_D = jfet[jfetIndex][2]; // drain ohmic resistance
-        let R_S = jfet[jfetIndex][3]; // source ohmic resistance
-        LAMBDA = jfet[jfetIndex][4]; // chanel-lengt modulation
-        V_TO = jfet[jfetIndex][5]; // threshold voltage
-        V_TOtc = jfet[jfetIndex][6]; // V_TO temperature coeffitient [V/°C^-1]
+    // parameters of the transistor    
+    BETA = jfet[jfetIndex][0]; // transcoductance parameter
+    BETA_tce = jfet[jfetIndex][1] * 1e-2; // beta exponential temperature coeffitient [%/°C]
+    let R_D = jfet[jfetIndex][2]; // drain ohmic resistance
+    let R_S = jfet[jfetIndex][3]; // source ohmic resistance
+    LAMBDA = jfet[jfetIndex][4]; // chanel-lengt modulation
+    V_TO = jfet[jfetIndex][5]; // threshold voltage
+    V_TOtc = jfet[jfetIndex][6]; // V_TO temperature coeffitient [V/°C^-1]
 
     // correction
     V_TOCorrected = V_TO + V_TOtc * (T - T_ref);
@@ -148,11 +168,11 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
 
 // default display
 
-jfetQPointCalc(0, V_DD, 0, T);       
+jfetQPointCalc(0, V_DD, 0, T);
 jfetTransferCharacteristicMake(0, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
-
-
 updateResistor();
+updateAv();
+updateAi();
 
 //console.log("I_DSS: " + I_DSS + "\nV_DS:" + V_DS + "\nI_D0: " + I_D0 + "\nV_GS0:" + V_GS0 + "\nR_S: " + R_S + "\nR_D: " + R_D);
 
@@ -311,7 +331,7 @@ const chart = new Chart(ctx, {
 
 // logic
 
-function updateChart(/*V_DD*/) {
+function updateChart( /*V_DD*/ ) {
     transferI_D = [];
     //jfetQPointCalc(jfetIndex, V_DD, 0, T);
     jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
@@ -325,8 +345,8 @@ function updateChartData(changedV_GS) {
         tempStatament,
         tempCondition;
 
-    for (let i = 1 ; i <= 7 ; i++ )
-    chart.data.datasets[i].data = [];
+    for (let i = 1; i <= 7; i++)
+        chart.data.datasets[i].data = [];
 
     newID_0 = solveI_D(V_DD, changedV_GS, T, jfetIndex);
     chart.data.datasets[1].data = [{ x: changedV_GS, y: newID_0 * 1e3, r: 5 }];
@@ -344,7 +364,7 @@ function updateChartData(changedV_GS) {
     tempCondition = tempBase < V_GSUp;
     tempStatament = tempCondition ? (tempBase) : V_GSUp;
     chart.data.datasets[5].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: tempCondition ? solveI_D(V_DD, tempBase, T, jfetIndex) * 1e3 : I_DSS }];
- 
+
     // top side
     tempBase = Number(changedV_GS) + Number(V_inp);
     tempCondition = tempBase < I_DSS;
@@ -366,32 +386,64 @@ function searchInE24(resistor) {
     let digits = resistor.toFixed(0).toString().length;
     diff = [];
     let i = 0;
-    for (i = 0 ; i < e24.length ; i++) {
-        diff.push(Math.abs(e24[i]*Math.pow(10,digits - 1) - resistor));
+    for (i = 0; i < e24.length; i++) {
+        diff.push(Math.abs(e24[i] * Math.pow(10, digits - 1) - resistor));
     }
-    let temp = (e24[diff.indexOf(Math.min(...diff))]*Math.pow(10,digits-1)).toFixed(0);
+    let temp = (e24[diff.indexOf(Math.min(...diff))] * Math.pow(10, digits - 1)).toFixed(0);
     if (temp >= 1e3)
-        temp = (temp / 1e3).toString() + "k"; 
+        temp = (temp / 1e3).toString() + "k";
     if (temp >= 1e6)
-        temp = (temp / 1e6).toString() + "M"; 
+        temp = (temp / 1e6).toString() + "M";
     return (temp);
 }
 
 function updateResistor() {
     tempID_0 = solveI_D(V_DD, V_GS0, T, jfetIndex);
     // calc the resistances
-    R_S = Math.abs(V_GS0 / tempID_0);
-    R_D = (V_DD - V_DS - Math.abs(V_GS0)) / tempID_0; 
+    let tempR_S = Math.abs(V_GS0 / tempID_0)
+    R_S = (tempR_S > 0) ? tempR_S : 0.0;
+    let tempR_D = (V_DD - V_DS - Math.abs(V_GS0)) / tempID_0;
+    R_D = (tempR_D > 0) ? tempR_D : 0.0;
     $("#valueOfR_S").text(R_S.toFixed(2));
-    $("#valueOfR_D").text(R_D.toFixed(2));    
+    $("#valueOfR_D").text(R_D.toFixed(2));
     // search in E24
-    let E24R_S = searchInE24(R_S); 
-    let E24R_D = searchInE24(R_D); 
+    let E24R_S = (tempR_S > 0) ? searchInE24(R_S) : 0.0;
+    let E24R_D = (tempR_D > 0) ? searchInE24(R_D) : 0.0;
     $("#valueOfR_SInE24").text(E24R_S);
     $("#valueOfR_DInE24").text(E24R_D);
+    // output impadence
+    y_22s = LAMBDA * I_D0;
+    r_0 = 1 / y_22s;
+    Z_out = 1 / ((1 / r_0) + (1 / R_D));
+    $("#valueOfZ_out").text(Z_out.toFixed(2));
+    Z_out_eff = 1 / ((1 / r_0) + (1 / R_D) + (1 / Z_load));
+    $("#valueOfZ_out_eff").text(Z_out_eff.toFixed(2));
 }
+
+function updateAv() {
+    y_21s = 2 * BETACorrected * (1 + LAMBDA * V_DS) * (V_GS0 - V_TOCorrected);
+    y_22s = LAMBDA * I_D0;
+    r_0 = 1 / y_22s;
+    A_v = -y_21s * (1 / ((1 / r_0) + (1 / R_D) + (1 / Z_load)));
+    $("#valueOfV_out").text(((V_inp * 1e3) * A_v).toFixed(0));
+    $("#valueOfA_v").text((A_v).toFixed(2));
+}
+
+function updateAi() {
+    A_i = A_v * (Z_in / Z_out);
+    $("#valueOfA_i").text((A_i).toFixed(2));
+}
+
 $(function() {
     // default values
+    // inverted
+    if (amp == 0) {
+        inverted = true;
+        $(".inverted").text("inverted output signal")
+    } else {
+        inverted = false;
+        $(".inverted").text("");
+    }
     // drain current
     $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
     // gate-source voltage
@@ -410,6 +462,8 @@ $(function() {
         $("#valueOfV_GS0").text(Number(V_GS0).toFixed(2));
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         updateResistor();
+        updateAv();
+        updateAi();
     });
     // supply voltage
     $("#rangeV_DD").on('change', function() {
@@ -421,9 +475,12 @@ $(function() {
         $("#rangeV_GS").prop('value', V_GS0);
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
-        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
         chart.update(); //  <-- ITT A dinamikus ID
         updateResistor();
+        updateAv();
+        updateAi();
+
     });
     // changed ambient temperature
     $("#rangeT").on('change', function() {
@@ -435,9 +492,11 @@ $(function() {
         $("#rangeV_GS").prop('value', V_GS0);
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
-        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
         chart.update(); //  <-- ITT A dinamikus ID
-        updateResistor();        
+        updateResistor();
+        updateAv();
+        updateAi();
     });
     // input voltage
     $('#rangeV_inp').on('change', function() {
@@ -445,24 +504,23 @@ $(function() {
         $('#valueOfRangeV_inp').text((V_inp * 1e3).toFixed(0));
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
-
-
-
-
-        // teszt
-        gm = 2 * BETACorrected*(1+LAMBDA*V_DS)*(V_GS0-V_TOCorrected);
-        y22s = I_DSS / V_DS;
-        y22s = 25e-6;
-        Au = -gm * (1/((1/(1/y22s)) + (1/R_D) + (1/10000)));
-        console.log("Au: ", Au);
-
-
+        // update Av, Ai
+        updateAv();
+        updateAi();
+    });
+    // load resistance
+    $('#rangeZ_load').on('change', function() {
+        Z_load = $(this).val() * 1e3;
+        $('#valueOfRangeZ_load').text((Z_load * 1e-3).toFixed(1));
+        updateAv();
+        Z_out_eff = 1 / ((1 / r_0) + (1 / R_D) + (1 / Z_load));
+        $("#valueOfZ_out_eff").text(Z_out_eff.toFixed(2));
     });
     // jfet select
     $("#jfetSelect").on('change', function() {
         jfetIndex = $(this).val();
-        V_GSLow = jfet[jfetIndex][5];        
-        chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3;    // <--- Ez a statikus ID
+        V_GSLow = jfet[jfetIndex][5];
+        chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         // RESET ALL
         // V_DD
@@ -473,6 +531,10 @@ $(function() {
         $("#rangeT").prop('value', 26.85);
         T = 26.85;
         $('#valueOfRangeT').text(T);
+        // Z_load
+        $("#rangeZ_load").prop('value', 10);
+        Z_load = 10e3;
+        $('#valueOfRangeZ_load').text((Z_load * 1e-3).toFixed(1));
         // V_inp
         $("#rangeV_inp").prop('value', 100);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
@@ -493,7 +555,9 @@ $(function() {
         chart.options.scales.x.min = jfet[jfetIndex][5];
         chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
         chart.update();
-        updateResistor();          
+        updateResistor();
+        updateAv();
+        updateAi();
         // refreshing the "default" values
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         $("#valueOfV_GS0").text(V_GS0.toFixed(2));
