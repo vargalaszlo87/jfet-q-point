@@ -123,6 +123,9 @@ var
     V_DDmax = 30.0, // max coltage of "circuit"
     V_inp = 100e-3, // input voltage 
     V_GS0Changed = 0;
+// sine signal
+var
+    sinNumPoints = 100;
 
 // equations for calculating
 
@@ -196,8 +199,8 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
 
 // default display
 
-jfetQPointCalc(0, V_DD, 0, T);
-jfetTransferCharacteristicMake(0, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
+jfetQPointCalc(jfetIndex, V_DD, 0, T);
+jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
 updateResistor();
 updateAv();
 updateAi();
@@ -304,6 +307,21 @@ const chart = new Chart(ctx, {
                 borderDash: [8, 2],
                 fill: false
             },
+            // input sine wave
+            {
+                type: 'line',
+                label: '',
+                data: Array.from({ length: sinNumPoints }, (_, i) => {
+                    const y = 0 + ((solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex) * 1e3) - 0) * (i / (sinNumPoints - 1)); // Az y értékek lineárisan növekednek yStart és yEnd között
+                    const x = V_inp * Math.sin((i / (sinNumPoints - 1)) * 4 * Math.PI) + V_GS0; // x érték, ami egy teljes szinusz periódust lefed
+                    return { x, y };
+                }),
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
+                borderWidth: 1,
+                pointRadius: 0,
+                fill: false
+            },
         ]
     },
     options: {
@@ -400,6 +418,14 @@ function updateChartData(changedV_GS) {
 
     // bottom side
     chart.data.datasets[7].data = [{ x: changedV_GS - V_inp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }, { x: V_GSUp, y: solveI_D(V_DD, changedV_GS - V_inp, T, jfetIndex) * 1e3 }];
+
+    // Vin sine
+    tempArray = Array.from({ length: sinNumPoints }, (_, i) => {
+        const y = 0 + (Number(solveI_D(V_DD, changedV_GS - Number(V_inp), T, jfetIndex) * 1e3) - 0) * (i / (sinNumPoints - 1));
+        const x = V_inp * Math.sin((i / (sinNumPoints - 1)) * 4 * Math.PI) + Number(V_GS0);
+        return { x, y };
+    });
+    chart.data.datasets[8].data = tempArray;
 
     // update
     chart.update();
@@ -588,7 +614,6 @@ $(function() {
         // refreshing the "default" values
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
         $("#valueOfV_GS0").text(V_GS0.toFixed(2));
-
     });
 
 });

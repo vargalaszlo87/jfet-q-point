@@ -38,11 +38,11 @@ body {
 }
 
 span.value {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
 }
 
 span.parameter {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: bold;
 }
 
@@ -53,5 +53,5 @@ span.sign {
 }
 
 span.unit {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
 }
