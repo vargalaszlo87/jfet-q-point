@@ -1,6 +1,8 @@
 /*!
  * JFET Q-point v1.0.0 beta - not stable
  *
+ * script.js
+ *
  * This application calculates the middle Q-point of the JFET for maximum input signal.
  * You can use it to calculate the important parameters for an JFET small signal amplifier. 
  * It shows the operation in a spectacular way, can also be used for educational purposes. 
@@ -26,7 +28,6 @@
  *
  * Date: 2024-08-26
  */
-
 
 // implemented models
 
@@ -66,24 +67,24 @@ var jfet = [
     [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3],
 ];
 var
-    BETA,
-    BETA_tce,
-    BETACorrected,
-    LAMBDA,
-    V_TO,
-    V_TOtc,
-    V_TOCorrected,
-    y_21s,
-    y_22s,
-    r_0;
+    BETA, // transcoductance parameter
+    BETA_tce, // beta exponential temperature coeffitient [%/°C]
+    BETACorrected, // BETA after correction
+    LAMBDA, // chanel-lengt modulation
+    V_TO, // threshold voltage
+    V_TOtc, // V_TO temperature coeffitient [V/°C^-1]
+    V_TOCorrected, // V_TO after correction
+    y_21s, // transcoductance
+    y_22s, // output conductance
+    r_0; // drain-source resistance
 var
-    Z_load = 10e3,
-    Z_in = 1e6,
-    Z_out = 0,
-    Z_out_eff = 0,
-    C_s = 10e-6,
-    C_in = 1e-6,
-    C_out = 1e-6;
+    Z_load = 10e3, // load impedance
+    Z_in = 1e6, // input impedance
+    Z_out = 0, // output impedance
+    Z_out_eff = 0, // effective output impedance (with Z_load)
+    C_s = 10e-6, // source capacitor
+    C_in = 1e-6, // input capacitor
+    C_out = 1e-6; // output capacitor
 // E24
 var e24 = [
     1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1
@@ -94,33 +95,33 @@ var solver = [
     100 // max iteration
 ];
 var
-    V_GSLow = jfet[jfetIndex][5],
-    V_GSUp = 0,
-    V_GSStep = 1e-2,
-    T_ref = 26.85;
+    V_GSLow = jfet[jfetIndex][5], // the lowest voltage of V_GS
+    V_GSUp = 0, // the highest voltage of V_GS
+    V_GSStep = 1e-2, // number of step from V_GSLow to V_GSUp
+    T_ref = 26.85; // temperature reference
 // calculated values
 var
-    I_DSS = 0.0,
-    m,
-    V_DS,
-    I_D0,
-    V_GS0,
-    R_S,
-    R_D,
-    A_v,
-    A_i;
+    I_DSS = 0.0, // maximum current at V_GS = 0 point
+    m, // the slope of the line between I_DS and V_DS in output-characteristics
+    V_DS, // Drain-Source voltage
+    I_D0, // the drain current of one of biasing point
+    V_GS0, // the V_GS voltage of one of biasing point
+    R_S, // source resistance
+    R_D, // drain resistance
+    A_v, // voltage gain
+    A_i; // current grain
 // transfer characteristic
 var
     transferV_GS = [],
     transferI_D = [];
 // simulation
 var
-    amp = 0,
-    inverted = true,
-    T = 26.85,
-    V_DD = 10.0,
-    V_DDmax = 30.0,
-    V_inp = 100e-3,
+    amp = 0, // type of amplifier
+    inverted = true, // output signal inverting
+    T = 26.85, // temperature of ambient
+    V_DD = 10.0, // voltage of "circuit"
+    V_DDmax = 30.0, // max coltage of "circuit"
+    V_inp = 100e-3, // input voltage 
     V_GS0Changed = 0;
 
 // equations for calculating
@@ -135,18 +136,16 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         V_DS = 0,
         I_DActual = 0.0,
         I_DPrevius = 0,
-        //V_TOCorrected = 0,
-        //BETACorrected = 0,
         iteration = 0;
 
     // parameters of the transistor    
-    BETA = jfet[jfetIndex][0]; // transcoductance parameter
-    BETA_tce = jfet[jfetIndex][1] * 1e-2; // beta exponential temperature coeffitient [%/°C]
+    BETA = jfet[jfetIndex][0];
+    BETA_tce = jfet[jfetIndex][1] * 1e-2;
     let R_D = jfet[jfetIndex][2]; // drain ohmic resistance
     let R_S = jfet[jfetIndex][3]; // source ohmic resistance
-    LAMBDA = jfet[jfetIndex][4]; // chanel-lengt modulation
-    V_TO = jfet[jfetIndex][5]; // threshold voltage
-    V_TOtc = jfet[jfetIndex][6]; // V_TO temperature coeffitient [V/°C^-1]
+    LAMBDA = jfet[jfetIndex][4];
+    V_TO = jfet[jfetIndex][5];
+    V_TOtc = jfet[jfetIndex][6];
 
     // correction
     V_TOCorrected = V_TO + V_TOtc * (T - T_ref);

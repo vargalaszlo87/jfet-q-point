@@ -1,3 +1,36 @@
+<!--
+/*!
+ * JFET Q-point v1.0.0 beta - not stable
+ *
+ * index.html
+ *
+ * This application calculates the middle Q-point of the JFET for maximum input signal.
+ * You can use it to calculate the important parameters for an JFET small signal amplifier. 
+ * It shows the operation in a spectacular way, can also be used for educational purposes. 
+ *
+ * Copyright (C) 2024 Varga Laszlo
+ * 
+ * https://github.com/vargalaszlo87/jfet-q-point
+ * http://vargalaszlo.com
+ * http://ha1cx.hu
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Date: 2024-08-26
+ */
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +40,6 @@
     <script type="text/javascript" src="assets/plugins/jquery-3.7.1.slim.min.js"></script>
     <script type="text/javascript" src="assets/plugins/chart-4.4.3.min.js"></script>
     <!-- main -->
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -73,9 +105,9 @@
                 <td><span class="parameter">Type of Amplifier:</span></td>
                 <td>
                     <select id="amplifierSelect">
-                            <option value="0">Common Source</option>
-                            <!--<option value="1">Common Drain</option>-->
-                        </select>
+                                <option value="0">Common Source</option>
+                                <!--<option value="1">Common Drain</option>-->
+                            </select>
                 </td>
             </tr>
             <tr>
@@ -123,8 +155,6 @@
 
         </table>
     </div>
-
-
 </body>
 <script type="text/javascript" src="script.js"></script>
 

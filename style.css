@@ -1,6 +1,33 @@
-::range-progress {
-    background-color: #ededed;
-}
+/*!
+ * JFET Q-point v1.0.0 beta - not stable
+ *
+ * style.css
+ *
+ * This application calculates the middle Q-point of the JFET for maximum input signal.
+ * You can use it to calculate the important parameters for an JFET small signal amplifier. 
+ * It shows the operation in a spectacular way, can also be used for educational purposes. 
+ *
+ * Copyright (C) 2024 Varga Laszlo
+ * 
+ * https://github.com/vargalaszlo87/jfet-q-point
+ * http://vargalaszlo.com
+ * http://ha1cx.hu
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Date: 2024-08-26
+ */
 
 
 /* span */
