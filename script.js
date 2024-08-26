@@ -1,6 +1,34 @@
-// calculating			
+/*!
+ * JFET Q-point v1.0.0 beta - not stable
+ *
+ * This application calculates the middle Q-point of the JFET for maximum input signal.
+ * You can use it to calculate the important parameters for an JFET small signal amplifier. 
+ * It shows the operation in a spectacular way, can also be used for educational purposes. 
+ *
+ * Copyright (C) 2024 Varga Laszlo
+ * 
+ * https://github.com/vargalaszlo87/jfet-q-point
+ * http://vargalaszlo.com
+ * http://ha1cx.hu
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Date: 2024-08-26
+ */
 
-// models
+
+// implemented models
 
 /*
 .model 2N3819 NJF(Beta=1.304m Betatce=-.5 Rd=1 Rs=1 Lambda=2.25m Vto=-3 Vtotc=-2.5m Is=33.57f Isr=322.4f N=1 Nr=2 Xti=3 Alpha=311.7u Vk=243.6 Cgd=1.6p M=.3622 Pb=1 Fc=.5 Cgs=2.414p Kf=9.882E-18 Af=1 mfg=Vishay)
@@ -11,6 +39,8 @@
 .MODEL BF256A NJF(VTO=-2.1333 BETA=1.06491m BETATCE=-0.5 LAMBDA=1.68673E-2 RD=1.41231E1 RS=1.41231E1 CGS=2.10000p CGD=2.30000p PB=7.73895E-1 IS=3.50865E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 .MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 */
+
+// variables
 
 var jfetIndex = 0;
 var jfetName = [
@@ -39,8 +69,6 @@ var
     BETA,
     BETA_tce,
     BETACorrected,
-    //R_D,
-    //R_S,
     LAMBDA,
     V_TO,
     V_TOtc,
@@ -94,6 +122,8 @@ var
     V_DDmax = 30.0,
     V_inp = 100e-3,
     V_GS0Changed = 0;
+
+// equations for calculating
 
 function jfetTransferCharacteristic(V_GS, V_DS, LAMBDA, BETA, V_TO) {
     return (V_GS < V_TO) ? 0.0 : ((BETA * Math.pow(V_GS - V_TO, 2)) * (1 + LAMBDA * V_DS));
@@ -165,7 +195,6 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
     }
 }
 
-
 // default display
 
 jfetQPointCalc(0, V_DD, 0, T);
@@ -174,9 +203,8 @@ updateResistor();
 updateAv();
 updateAi();
 
-//console.log("I_DSS: " + I_DSS + "\nV_DS:" + V_DS + "\nI_D0: " + I_D0 + "\nV_GS0:" + V_GS0 + "\nR_S: " + R_S + "\nR_D: " + R_D);
+// setup and showing
 
-// drawing
 const ctx = document.getElementById('jfet-transfer-characteristic');
 const chart = new Chart(ctx, {
     data: {
@@ -329,11 +357,10 @@ const chart = new Chart(ctx, {
     }
 });
 
-// logic
+// events for calculating and showing
 
-function updateChart( /*V_DD*/ ) {
+function updateChart() {
     transferI_D = [];
-    //jfetQPointCalc(jfetIndex, V_DD, 0, T);
     jfetTransferCharacteristicMake(jfetIndex, V_DD, T, V_GSLow, V_GSUp, V_GSStep);
     chart.data.datasets[0].data = transferI_D;
     chart.update();
@@ -377,6 +404,7 @@ function updateChartData(changedV_GS) {
 
     // update
     chart.update();
+
     //const xScale = chart.scales.x;
     //const xAxisWidth = xScale.width;
     //console.log(xAxisWidth);
@@ -474,9 +502,9 @@ $(function() {
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
-        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
-        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
-        chart.update(); //  <-- ITT A dinamikus ID
+        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- dynamic ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- static ID
+        chart.update(); //  <-- dynamic ID
         updateResistor();
         updateAv();
         updateAi();
@@ -491,9 +519,9 @@ $(function() {
         updateChartData(V_GS0);
         $("#rangeV_GS").prop('value', V_GS0);
         $("#valueOfI_D0").text(Number(solveI_D(V_DD, V_GS0, T, jfetIndex) * 1e3).toFixed(2));
-        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- ITT A dinamikus ID
-        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
-        chart.update(); //  <-- ITT A dinamikus ID
+        //chart.options.scales.y.max = I_DSS * 1e3; //  <-- dynamic ID
+        chart.options.scales.y.max = solveI_D(V_DD, 0, T, jfetIndex) * 1e3; // <--- static ID
+        chart.update(); //  <-- dynamic ID
         updateResistor();
         updateAv();
         updateAi();
@@ -520,7 +548,7 @@ $(function() {
     $("#jfetSelect").on('change', function() {
         jfetIndex = $(this).val();
         V_GSLow = jfet[jfetIndex][5];
-        chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3; // <--- Ez a statikus ID
+        chart.options.scales.y.max = solveI_D(V_DDmax, 0, T, jfetIndex) * 1e3; // <--- static ID
         $('#rangeV_GS').attr('min', jfet[jfetIndex][5]);
         // RESET ALL
         // V_DD
