@@ -121,11 +121,13 @@ var
     T = 26.85, // temperature of ambient
     V_DD = 10.0, // voltage of "circuit"
     V_DDmax = 30.0, // max coltage of "circuit"
-    V_inp = 100e-3, // input voltage 
+    V_inp = 200e-3, // input voltage 
     V_GS0Changed = 0;
 // sine signal
 var
-    sinNumPoints = 100;
+    sinNumPoints = 150,
+    sinOutputX = [],
+    sinOutputY = [];
 
 // equations for calculating
 
@@ -237,6 +239,7 @@ const chart = new Chart(ctx, {
                 ],
                 borderColor: '#52be80',
                 backgroundColor: '#52be80',
+                borderDash: [8, 2],
                 fill: false
             },
             // from the Q-point                
@@ -249,6 +252,7 @@ const chart = new Chart(ctx, {
                 ],
                 borderColor: '#52be80',
                 backgroundColor: '#52be80',
+                borderDash: [8, 2],
                 fill: false
             },
             // left side
@@ -314,6 +318,8 @@ const chart = new Chart(ctx, {
                 data: Array.from({ length: sinNumPoints }, (_, i) => {
                     const y = 0 + ((solveI_D(V_DD, V_GS0 - V_inp, T, jfetIndex) * 1e3) - 0) * (i / (sinNumPoints - 1)); // Az y értékek lineárisan növekednek yStart és yEnd között
                     const x = V_inp * Math.sin((i / (sinNumPoints - 1)) * 4 * Math.PI) + V_GS0; // x érték, ami egy teljes szinusz periódust lefed
+                    sinOutputY.push(solveI_D(V_DD, x, T, jfetIndex) * 1e3);
+                    sinOutputX.push((V_GS0 + V_inp) + (Math.abs(V_GS0 + V_inp)/sinNumPoints) * i );
                     return { x, y };
                 }),
                 borderColor: '#ff0000',
@@ -322,6 +328,19 @@ const chart = new Chart(ctx, {
                 pointRadius: 0,
                 fill: false
             },
+            // output sine wave
+            {
+                type: 'line',
+                label: '',
+                data: Array.from({ length: sinNumPoints }, (_, i) => {
+                    return { x: sinOutputX.pop(), y: sinOutputY.pop() };
+                }),
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
+                borderWidth: 1,
+                pointRadius: 0,
+                fill: false                
+            }
         ]
     },
     options: {
@@ -423,9 +442,18 @@ function updateChartData(changedV_GS) {
     tempArray = Array.from({ length: sinNumPoints }, (_, i) => {
         const y = 0 + (Number(solveI_D(V_DD, changedV_GS - Number(V_inp), T, jfetIndex) * 1e3) - 0) * (i / (sinNumPoints - 1));
         const x = V_inp * Math.sin((i / (sinNumPoints - 1)) * 4 * Math.PI) + Number(V_GS0);
+        sinOutputY.push(solveI_D(V_DD, x, T, jfetIndex) * 1e3);
+        sinOutputX.push((Number(V_GS0) + V_inp) + (Math.abs(Number(V_GS0) + V_inp)/sinNumPoints) * i);
+        //console.log((Number(V_GS0) + V_inp) + (Math.abs(Number(V_GS0) + V_inp)/sinNumPoints) * i);
         return { x, y };
     });
     chart.data.datasets[8].data = tempArray;
+
+    // Vout sine
+    tempArray2 = Array.from({ length: sinNumPoints }, (_, i) => {
+        return { x: sinOutputX.pop(), y: sinOutputY.pop() };
+    });
+    chart.data.datasets[9].data = tempArray2;
 
     // update
     chart.update();
@@ -487,8 +515,19 @@ function updateAi() {
     $("#valueOfA_i").text((A_i).toFixed(2));
 }
 
+function updateCircuitPosition() {
+    var c = $("canvas").first();
+    let positionCanvas = c.position();
+    $("#circuit").css({left: positionCanvas.left + 70, top: positionCanvas.top + 20}); 
+}
+
 $(function() {
     // default values
+    // images
+    updateCircuitPosition();
+    $(window).resize(function() {
+        updateCircuitPosition();
+    });
     // inverted
     if (amp == 0) {
         inverted = true;
@@ -591,7 +630,7 @@ $(function() {
         // V_inp
         $("#rangeV_inp").prop('value', 100);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
-        V_inp = 100e-3;
+        V_inp = 200e-3;
         // pop all items
         while (transferV_GS.length > 0)
             transferV_GS.pop();

@@ -29,29 +29,81 @@
  * Date: 2024-08-26
  */
 
-
-/* span */
-
 body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
 }
 
-span.value {
-    font-size: 1.25rem;
-}
+/* boxes */
 
-span.parameter {
-    font-size: 1.25rem;
-    font-weight: bold;
-}
+    div#container-chart {
+        float: left; 
+        height: 630px;
+    }
 
-span.sign {
-    font-size: 1.0rem;
-    color: #666;
-    margin: 0 0.4rem;
-}
+    div#container-variables {
+        float: left;
+        line-height: 1.5
+    }
 
-span.unit {
-    font-size: 1.25rem;
-}
+        div#chart {
+            width: 600px;
+            height: 600px;
+        }
+
+        canvas#jfet-transfer-characteristic {
+            height: 600px;
+        }
+
+/* texts */        
+
+    h1 {
+        color: #143d8f;
+        text-transform: uppercase;
+        font-size: 1.8rem;
+    }
+
+    span.value {
+        font-size: 1.2rem;
+    }
+
+    span.parameter {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    span.sign {
+        font-size: 1.0rem;
+        color: #666;
+        margin: 0 0.4rem;
+    }
+
+    span.unit {
+        font-size: 1.2rem;
+    }
+
+/* images */
+
+    img#circuit {
+        z-index: 1000; 
+        position: absolute; 
+        width: 250px; 
+        border: dashed 1px #999; 
+    }
+
+    img#logo {
+        height: 25px; 
+        float: right;
+    }
+
+/* tables/inputs */
+
+    table#variables {
+        margin-left: 1rem;
+    }
+
+    input#rangeV_GS {
+        margin: 0 auto;
+        display: block;
+        margin-left: 50px;  
+    }

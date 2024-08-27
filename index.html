@@ -44,19 +44,24 @@
 </head>
 
 <body>
-
-    <h1>JFET transfer-characteristic and Selft-biasing</h1>
-    <div style="width: 600px; height: 600px; float: left;">
-        <canvas id="jfet-transfer-characteristic" style="height: 600px"></canvas>
-        <input type="range" id="rangeV_GS" style="margin: 0 auto; display: block; margin-left: 50px;" min="0" max="0" step="0.1" value="0">
+    <h1>JFET transfer-characteristic, self-biasing and amplifying</h1>
+    <img id="circuit" src="assets/images/j-fet-q-point-circuit-cs.png" />
+    <div id="container-chart">
+        <div id="chart">
+            <canvas id="jfet-transfer-characteristic"></canvas>
+        </div>
+        <div>
+            <input type="range" id="rangeV_GS" min="0" max="0" step="0.1" value="0">
+        </div>
     </div>
-    <div style="float: left; line-height: 1.5">
-        <table>
+    <div id="container-variables">
+        <table id="variables">
             <tr>
                 <td><span class="parameter">Type of JFET:</span></td>
                 <td>
                     <select id="jfetSelect"></select>
                 </td>
+                <td><a href="http://ha1cx.hu" target="_blank"><img src="assets/images/ha1cx.png" id="logo"></a></td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -144,8 +149,8 @@
             </tr>
             <tr>
                 <td><span class="parameter">Input voltage</span><span class="sign">(V<sub>in</sub>):</span></td>
-                <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="100"></td>
-                <td><span id="valueOfRangeV_inp" class="value">100</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
+                <td><input type="range" id="rangeV_inp" style="width: 220px;" min="1" max="1000" step="1" value="200"></td>
+                <td><span id="valueOfRangeV_inp" class="value">200</span>&nbsp;<span class="unit">mV<sub>peak</sub></span></td>
             </tr>
             <tr>
                 <td><span class="parameter">Output voltage</span><span class="sign">(V<sub>out</sub>):</span></td>
@@ -157,5 +162,4 @@
     </div>
 </body>
 <script type="text/javascript" src="script.js"></script>
-
 </html>
