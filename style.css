@@ -1,5 +1,5 @@
 /*!
- * JFET Q-point v1.0.0 beta - not stable
+ * JFET Q-point v1.0.0
  *
  * style.css
  *
@@ -62,6 +62,10 @@ body {
         text-transform: uppercase;
         font-size: 1.8rem;
     }
+
+        h1 > span {
+            font-size: 0.75rem; 
+        }
 
     span.value {
         font-size: 1.2rem;
