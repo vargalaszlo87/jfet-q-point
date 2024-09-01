@@ -1,7 +1,7 @@
 /*!
  * JFET Q-point v1.0.0
  *
- * script.js
+ * jfet-q-point-1.0.0.js
  *
  * This application calculates the middle Q-point of the JFET for maximum input signal.
  * You can use it to calculate the important parameters for an JFET small signal amplifier. 
@@ -120,7 +120,7 @@ let simulation = {
 };
 // sine signal
 let sin = {
-    NumPoints: 150,
+    NumPoints: 50,
     OutputX: [],
     OutputY: []
 }
@@ -137,7 +137,6 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         I_DActual = 0.0,
         I_DPrevius = 0,
         iteration = 0;
-
     // parameters of the transistor    
     jfetParameters.BETA = jfetModels[jfetIndex].params[0];
     jfetParameters.BETA_tce = jfetModels[jfetIndex].params[1] * 1e-2;
@@ -146,11 +145,9 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
     jfetParameters.LAMBDA = jfetModels[jfetIndex].params[4];
     jfetParameters.V_TO = jfetModels[jfetIndex].params[5];
     jfetParameters.V_TOtc = jfetModels[jfetIndex].params[6];
-
     // correction
     jfetParameters.V_TOCorrected = jfetParameters.V_TO + jfetParameters.V_TOtc * (T - simulation.T_ref);
     jfetParameters.BETACorrected = jfetParameters.BETA * Math.exp(jfetParameters.BETA_tce * (T - simulation.T_ref));
-
     // Newton method
     do {
         I_DPrevius = I_DActual;
@@ -158,7 +155,6 @@ function solveI_D(V_DD, V_GSActual, T, jfetIndex) {
         I_DActual = jfetTransferCharacteristic(V_GSActual, V_DS, jfetParameters.LAMBDA, jfetParameters.BETACorrected, jfetParameters.V_TOCorrected);
         iteration++;
     } while (Math.abs(I_DActual - I_DPrevius) > solver.tolerance && iteration < solver.maxIteration);
-
     return I_DActual;
 }
 
@@ -177,7 +173,7 @@ function solveI_DRightOrTop() {
 function jfetQPointCalc(_jfetIndex, V_DD, V_GS, T) {
     jfetIndex = _jfetIndex;
     calculated.I_DSS = solveI_D(V_DD, V_GS, T, jfetIndex);
-    calculated.m = -calculated.I_DSS / V_DD; // calculated.m = (y2 - y1) / (x2 - x1);
+    calculated.m = -calculated.I_DSS / V_DD; // calculated: m = (y2 - y1) / (x2 - x1);
     calculated.V_DS = ((V_DD - Math.abs(jfetModels[jfetIndex].params[5])) / 2) + Math.abs(jfetModels[jfetIndex].params[5]);
     calculated.I_D0 = calculated.I_DSS - Math.abs(calculated.m) * calculated.V_DS;
     calculated.V_GS0 = jfetModels[jfetIndex].params[5] + Math.sqrt(calculated.I_D0 / (jfetModels[jfetIndex].params[0] * (1 + jfetModels[jfetIndex].params[4] * calculated.V_DS)));
@@ -194,7 +190,7 @@ function jfetTransferCharacteristicMake(_jfetIndex, V_DD, T, _V_GSLow, _V_GSUp, 
     let V_GSActucal;
     for (V_GSActual = V_GS.Low; V_GSActual <= V_GS.Up; V_GSActual += V_GSStep) {
         transfer.I_D.push(solveI_D(V_DD, V_GSActual, T, jfetIndex) * 1e3);
-        transfer.V_GS.push(V_GSActual.toFixed(4)); // toFixed(4)
+        transfer.V_GS.push(V_GSActual.toFixed(4));
     }
     if (calculated.I_DSS == 0.0)
         calculated.I_DSS = solveI_D(V_DD, 0, T, jfetIndex);
@@ -406,37 +402,29 @@ function updateChartData(changedV_GS) {
         tempBase,
         tempStatament,
         tempCondition;
-
-    for (let i = 1; i <= 7; i++)
-        chart.data.datasets[i].data = [];
-
+    // main
     newID_0 = solveI_D(simulation.V_DD, changedV_GS, simulation.T, jfetIndex);
     chart.data.datasets[1].data = [{ x: changedV_GS, y: newID_0 * 1e3, r: 5 }];
     chart.data.datasets[2].data = [{ x: changedV_GS, y: 0 }, { x: changedV_GS, y: newID_0 * 1e3 }];
     chart.data.datasets[3].data = [{ x: changedV_GS, y: newID_0 * 1e3 }, { x: 0, y: newID_0 * 1e3 }];
-
     // left
     tempBase = (Number(changedV_GS) - Number(simulation.V_inp));
     tempCondition = tempBase > V_GS.Low;
     tempStatament = tempCondition ? tempBase : V_GS.Low;
     chart.data.datasets[4].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: solveI_D(simulation.V_DD, tempBase, simulation.T, jfetIndex) * 1e3 }];
-
     // right
     tempBase = (Number(changedV_GS) + Number(simulation.V_inp));
     tempCondition = tempBase < V_GS.Up;
     tempStatament = tempCondition ? (tempBase) : V_GS.Up;
     chart.data.datasets[5].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: tempCondition ? solveI_D(simulation.V_DD, tempBase, simulation.T, jfetIndex) * 1e3 : calculated.I_DSS }];
-
     // top side
     tempBase = Number(changedV_GS) + Number(simulation.V_inp);
     tempCondition = tempBase < calculated.I_DSS;
     tempStatament = tempCondition ? tempBase : 0;
     tempI_D0Up = solveI_D(simulation.V_DD, tempStatament, simulation.T, jfetIndex) * 1e3
     chart.data.datasets[6].data = [{ x: tempStatament, y: tempI_D0Up }, { x: V_GS.Up, y: tempI_D0Up }];
-
     // bottom side
     chart.data.datasets[7].data = [{ x: changedV_GS - simulation.V_inp, y: solveI_D(simulation.V_DD, changedV_GS - simulation.V_inp, simulation.T, jfetIndex) * 1e3 }, { x: V_GS.Up, y: solveI_D(simulation.V_DD, changedV_GS - simulation.V_inp, simulation.T, jfetIndex) * 1e3 }];
-
     // Vin sine
     tempArray = Array.from({ length: sin.NumPoints }, (_, i) => {
         const y = 0 + (Number(solveI_D(simulation.V_DD, changedV_GS - Number(simulation.V_inp), simulation.T, jfetIndex) * 1e3) - 0) * (i / (sin.NumPoints - 1));
@@ -446,13 +434,11 @@ function updateChartData(changedV_GS) {
         return { x, y };
     });
     chart.data.datasets[8].data = tempArray;
-
     // Vout sine
     tempArray2 = Array.from({ length: sin.NumPoints }, (_, i) => {
         return { x: sin.OutputX.pop(), y: sin.OutputY.pop() };
     });
     chart.data.datasets[9].data = tempArray2;
-
     // update
     chart.update();
 }
@@ -622,21 +608,21 @@ $(function() {
         $('#rangeV_GS').attr('min', jfetModels[jfetIndex].params[5]);
         // RESET ALL
         // V_DD
-        $("#rangeV_DD").prop('value', 10.0);
-        $('#valueOfRangeV_DD').text($("#rangeV_DD").val());
-        simulation. V_DD = 10.0;
+        simulation.V_DD = 10.0;
+        $("#rangeV_DD").prop('value', simulation.V_DD);
+        $('#valueOfRangeV_DD').text($("#rangeV_DD").val()); 
         // T
-        $("#rangeT").prop('value', 26.85);
-        simulation.T = 26.85;
+        simulation.T = simulation.T_ref;
+        $("#rangeT").prop('value', simulation.T);
         $('#valueOfRangeT').text(simulation.T);
         // Z_load
-        $("#rangeZ_load").prop('value', 10);
         component.Z_load = 10e3;
+        $("#rangeZ_load").prop('value', component.Z_load * 1e-3);
         $('#valueOfRangeZ_load').text((component.Z_load * 1e-3).toFixed(1));
         // V_inp
-        $("#rangeV_inp").prop('value', 100);
+        simulation.V_inp = 200e-3;       
+        $("#rangeV_inp").prop('value', simulation.V_inp*1e+3);
         $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
-        simulation.V_inp = 200e-3;
         // pop all items
         while (transfer.V_GS.length > 0)
             transfer.V_GS.pop();
