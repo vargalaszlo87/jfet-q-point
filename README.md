@@ -15,7 +15,8 @@ This project is licensed under the GNU General Public License v3.0 or later.
 
 ## Try it!
 
-http://ha1cx.hu/jfet-q-point
+[Live demo!](http://ha1cx.hu/jfet-q-point)
+
 
 ## Screnshot of the dashboard
 
