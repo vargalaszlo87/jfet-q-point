@@ -61,7 +61,9 @@
                 <td>
                     <select id="jfetSelect"></select>
                 </td>
-                <td><a href="http://ha1cx.hu" target="_blank"><img src="assets/images/ha1cx.png" id="logo"></a></td>
+                <td>
+                    <a href="http://ha1cx.hu" target="_blank"><img src="assets/images/ha1cx.png" id="logo"></a>
+                </td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -76,7 +78,7 @@
             <tr>
                 <td><span class="parameter">Ambient temperature</span><span class="sign">(T<sub>AMB</sub>):</span></td>
                 <td><input type="range" id="rangeT" style="width: 220px;" min="-20" max="80" step="0.1" value="26.85"></td>
-                <td><span id="valueOfRangeT" class="value">26.85</span>&nbsp;<span class="unit">°C</span></td>
+                <td><span id="valueOfRangeT" class="value">26.85</span>&nbsp;<span class="unit">&#8451;</span></td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -93,13 +95,13 @@
             </tr>
             <tr>
                 <td><span class="parameter">Drain resistor</span><span class="sign">(R<sub>D</sub>):</span></td>
-                <td><span id="valueOfR_D" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
-                <td><span id="valueOfR_DInE24" class="value"></span><span class="unit">Ω</span><sub>E24</sub></td>
+                <td><span id="valueOfR_D" class="value"></span>&nbsp;<span class="unit">&#8486;</span></td>
+                <td><span id="valueOfR_DInE24" class="value"></span><span class="unit">&#8486;</span><sub>E24</sub></td>
             </tr>
             <tr>
                 <td><span class="parameter">Source resistor</span><span class="sign">(R<sub>S</sub>):</span></td>
-                <td><span id="valueOfR_S" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
-                <td><span id="valueOfR_SInE24" class="value"></span><span class="unit">Ω</span><sub>E24</sub></td>
+                <td><span id="valueOfR_S" class="value"></span>&nbsp;<span class="unit">&#8486;</span></td>
+                <td><span id="valueOfR_SInE24" class="value"></span><span class="unit">&#8486;</span><sub>E24</sub></td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -117,20 +119,20 @@
             </tr>
             <tr>
                 <td><span class="parameter">Input impedance</span><span class="sign">(Z<sub>in</sub>):</span></td>
-                <td><span id="valueOfZ_in" class="value">1</span>&nbsp;<span class="unit">MΩ</span> (fixed)</td>
+                <td><span id="valueOfZ_in" class="value">1</span>&nbsp;<span class="unit">M&#8486;</span> (fixed)</td>
             </tr>
             <tr>
                 <td><span class="parameter">Output impedance</span><span class="sign">(Z<sub>out</sub>):</span></td>
-                <td><span id="valueOfZ_out" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
+                <td><span id="valueOfZ_out" class="value"></span>&nbsp;<span class="unit">&#8486;</span></td>
             </tr>
             <tr>
                 <td><span class="parameter">Load impedance</span><span class="sign">(Z<sub>load</sub>):</span></td>
                 <td><input type="range" id="rangeZ_load" style="width: 220px;" min="0.1" max="50" step="0.1" value="10"></td>
-                <td><span id="valueOfRangeZ_load" class="value">10</span>&nbsp;<span class="unit">kΩ</span></td>
+                <td><span id="valueOfRangeZ_load" class="value">10</span>&nbsp;<span class="unit">k&#8486;</span></td>
             </tr>
             <tr>
                 <td><span class="parameter">Output eff. impedance</span><span class="sign">(Z<sub>out-eff</sub>):</span></td>
-                <td><span id="valueOfZ_out_eff" class="value"></span>&nbsp;<span class="unit">Ω</span></td>
+                <td><span id="valueOfZ_out_eff" class="value"></span>&nbsp;<span class="unit">&#8486;</span></td>
             </tr>
             <tr>
                 <td><span class="parameter">Voltage GAIN</span><span class="sign">(A<sub>v</sub>):</span></td>
@@ -160,6 +162,7 @@
 
         </table>
     </div>
+    <script type="text/javascript" src="jfet-q-point-1.0.0.js"></script>
 </body>
-<script type="text/javascript" src="jfet-q-point-1.0.0.js"></script>
+
 </html>
