@@ -42,6 +42,36 @@ const jfetModels = [
     { name: "BF245C", params: [5.43157e-4, -0.5, 1.20869e1, 1.20869e1, 2.71505e-2, -5.0014, -2.5e-3] }
 ];
 ```
+## Equations with optimization (in saturation region)
+
+$$I_{D} = \beta' * (V_{GS} - V_{TO}')^2 * (1 + \lambda * V_{DS})$$
+
+
+$$\beta' = \beta * exp(\beta_{tce} * (T - T_{ref}))$$
+
+
+$$V_{TO}' = V_{TO} + V_{TOtc} * (T - T_{ref})$$
+
+
+$$V_{DS} = \left(V_{DD} - \left|V_{TO}'\right|\right) + \left|V_{TO}'\right|$$
+
+
+$$I_{DSS} = I_{D} \text{ (where }V_{GS} = 0\text{ and }V_{DS} = V_{DD})$$
+
+
+$$m = \frac{-I_{DSS}}{V_{DD}}$$
+
+
+$$I_{D0} = I_{DSS} - \left|m\right| * V_{DS}$$
+
+
+$$V_{GS0} = V_{TO}' + \sqrt{\frac{I_{D0}}{\beta*(1 + \lambda*V_{DS})}}$$
+
+
+$$R_{S} = \left|\frac{V_{GS0}}{I_{D0}}\right|$$
+
+
+$$R_{D} = \frac{V_{DD} - V_{DS} - \left|V_{GS0}\right|}{I_{D0}}$$
 
 ## Installation
 
