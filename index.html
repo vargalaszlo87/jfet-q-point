@@ -10,10 +10,6 @@
  *
  * Copyright (C) 2024 Varga Laszlo
  * 
- * https://github.com/vargalaszlo87/jfet-q-point
- * http://vargalaszlo.com
- * http://ha1cx.hu
- *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option)
@@ -36,6 +32,7 @@
 
 <head>
     <title>jfet-q-point calculator - vargalaszlo.com - ha1cx.hu</title>
+    <meta http-equiv="content-language" content="en">
     <!-- asstes -->
     <script type="text/javascript" src="assets/plugins/jquery-3.7.1.slim.min.js"></script>
     <script type="text/javascript" src="assets/plugins/chart-4.4.3.min.js"></script>
@@ -61,9 +58,7 @@
                 <td>
                     <select id="jfetSelect"></select>
                 </td>
-                <td>
-                    <a href="http://ha1cx.hu" target="_blank"><img src="assets/images/ha1cx.png" id="logo"></a>
-                </td>
+                <td><a href="http://ha1cx.hu" target="_blank"><img src="assets/images/ha1cx.png" id="logo"></a></td>
             </tr>
             <tr>
                 <td colspan="3">
@@ -162,7 +157,7 @@
 
         </table>
     </div>
+    <div style="float: left; width: 100%">*Note: This tool uses an idealized small-signal model. In physical circuits, extreme values (such as very low loads or high inputs) lead to signal attenuation and<br /> non-linear distortion, causing real-world performance to differ from theoretical calculations.</div>
     <script type="text/javascript" src="jfet-q-point-1.0.0.js"></script>
 </body>
-
 </html>
