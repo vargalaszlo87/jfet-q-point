@@ -31,7 +31,7 @@ This project is licensed under the GNU General Public License v3.0 or later.
 ## Supported JFET Models
 
 The application supports the following JFET models, defined by key parameters including BETA ($\beta$), $V_{TO}$ (threshold voltage), and LAMBDA ($\lambda$):
-
+```javascript
 const jfetModels = [
     { name: "2N3819", params: [1.304e-3, -0.5, 1, 1, 2.25e-3, -3, -2.5e-3] },
     { name: "2N5434", params: [18e-3, -0.5, 1, 1, 25e-3, -1.9, -2.5e-3] },
@@ -41,6 +41,7 @@ const jfetModels = [
     { name: "BF256A", params: [1.06491e-3, -0.5, 1.41231e1, 1.41231e1, 1.68673e-2, -2.1333, -2.5e-3] },
     { name: "BF256B", params: [1.09045e-3, -0.5, 7.77648, 7.77648, 2.31754e-2, -2.3085, -2.5e-3] }
 ];
+```
 
 ## Equations (Saturation Region)
 
@@ -83,7 +84,7 @@ $$R_{D} = \frac{V_{DD} - V_{DS} - |V_{GS0}|}{I_{D0}}$$
 - jfet.TransferCharacteristicMake(...): Generates data points for plotting the static transfer curve.
 
 ### Key Data Structures
-
+```javascript
 let component = {
     Z_load: 10e3, // Load impedance (ohms)
     Z_in: 1e6,    // Input impedance (ohms)
@@ -102,7 +103,7 @@ let simulation = {
     V_DDmax: 30.0, // Maximum supply voltage (V)
     V_inp: 200e-3  // Input peak voltage (V)
 };
-
+```
 Note: This tool uses an idealized small-signal model ($Z_{in} = 1\text{ M}\Omega$). In physical circuits, extreme parameter values (such as very low load impedance) may cause non-linear distortion and signal attenuation, causing real-world amplifier performance to differ from theoretical calculations.
 
 ## License
