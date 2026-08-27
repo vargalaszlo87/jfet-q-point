@@ -44,6 +44,12 @@
 .MODEL BF256B NJF(VTO=-2.3085 BETA=1.09045m BETATCE=-0.5 LAMBDA=2.31754E-2 RD=7.77648 RS=7.77648 CGS=2.00000p CGD=2.20000p PB=9.91494E-1 IS=2.59121E-16 XTI=3 AF=1 FC=0.5 N=1 NR=2 MFG=PHILIPS)
 */
 
+/*!
+ * JFET Q-point v1.0.1 (Restored & Fixed)
+ *
+ * jfet-q-point-1.0.1.js
+ */
+
 // default jfet
 let jfetIndex = 0;
 
@@ -144,12 +150,9 @@ const jfet = {
         jfetIndex = _jfetIndex;
         calculated.I_DSS = jfet.SolvingCurrent(V_DD, V_GS, T, jfetIndex);
         calculated.m = -calculated.I_DSS / V_DD;
-        calculated.V_DS = ((V_DD - Math.abs(jfetParameters.V_TOCorrected)) / 2) + Math.abs(jfetParameters.V_TOCorrected);
+        calculated.V_DS = ((V_DD - Math.abs(jfetModels[jfetIndex].params[5])) / 2) + Math.abs(jfetModels[jfetIndex].params[5]);
         calculated.I_D0 = calculated.I_DSS - Math.abs(calculated.m) * calculated.V_DS;
-        
-        // JAVÍTVA: V_GS0 kiszámítása negatív tartományban (V_TO negatív!)
-        calculated.V_GS0 = jfetParameters.V_TOCorrected + Math.sqrt(calculated.I_D0 / (jfetParameters.BETACorrected * (1 + jfetParameters.LAMBDA * calculated.V_DS)));
-        
+        calculated.V_GS0 = jfetModels[jfetIndex].params[5] + Math.sqrt(calculated.I_D0 / (jfetModels[jfetIndex].params[0] * (1 + jfetModels[jfetIndex].params[4] * calculated.V_DS)));
         calculated.R_S = Math.abs(calculated.V_GS0 / calculated.I_D0);
         calculated.R_D = (V_DD - calculated.V_DS - Math.abs(calculated.V_GS0)) / calculated.I_D0;    
     },
@@ -176,9 +179,15 @@ const jfet = {
 };
 
 const defaultParam = {
-    current: () => jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0, simulation.T, jfetIndex) * 1e3,
-    leftOrBottom: () => jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0 - simulation.V_inp, simulation.T, jfetIndex) * 1e3,
-    rightOrTop: () => jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0 + simulation.V_inp, simulation.T, jfetIndex) * 1e3
+    current: () => {
+        return jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0, simulation.T, jfetIndex) * 1e3;
+    },
+    leftOrBottom: () => {
+        return jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0 - simulation.V_inp, simulation.T, jfetIndex) * 1e3;       
+    },
+    rightOrTop: () => {
+        return jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0 + simulation.V_inp, simulation.T, jfetIndex) * 1e3;
+    }
 };
 
 const e24 = {
@@ -196,7 +205,7 @@ const e24 = {
 
 const updatingValue = {
     resistor: () => {
-        let tempID_0 = jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0, simulation.T, jfetIndex);
+        tempID_0 = jfet.SolvingCurrent(simulation.V_DD, calculated.V_GS0, simulation.T, jfetIndex);
         let tempR_S = Math.abs(calculated.V_GS0 / tempID_0);
         calculated.R_S = (tempR_S > 0) ? tempR_S : 0.0;
         let tempR_D = (simulation.V_DD - calculated.V_DS - Math.abs(calculated.V_GS0)) / tempID_0;
@@ -210,7 +219,7 @@ const updatingValue = {
         $("#valueOfR_DInE24").text(E24R_D);
 
         jfetParameters.y_22s = jfetParameters.LAMBDA * calculated.I_D0;
-        jfetParameters.r_0 = (jfetParameters.y_22s !== 0) ? 1 / jfetParameters.y_22s : Infinity;
+        jfetParameters.r_0 = 1 / jfetParameters.y_22s;
         component.Z_out = 1 / ((1 / jfetParameters.r_0) + (1 / calculated.R_D));
         $("#valueOfZ_out").text(component.Z_out.toFixed(2));
         component.Z_out_eff = 1 / ((1 / jfetParameters.r_0) + (1 / calculated.R_D) + (1 / component.Z_load));
@@ -219,13 +228,13 @@ const updatingValue = {
     voltageGain: () => {
         jfetParameters.y_21s = 2 * jfetParameters.BETACorrected * (1 + jfetParameters.LAMBDA * calculated.V_DS) * (calculated.V_GS0 - jfetParameters.V_TOCorrected);
         jfetParameters.y_22s = jfetParameters.LAMBDA * calculated.I_D0;
-        jfetParameters.r_0 = (jfetParameters.y_22s !== 0) ? 1 / jfetParameters.y_22s : Infinity;
+        jfetParameters.r_0 = 1 / jfetParameters.y_22s;
         calculated.A_v = -jfetParameters.y_21s * (1 / ((1 / jfetParameters.r_0) + (1 / calculated.R_D) + (1 / component.Z_load)));
         $("#valueOfV_out").text(((simulation.V_inp * 1e3) * calculated.A_v).toFixed(0));
         $("#valueOfA_v").text((calculated.A_v).toFixed(2));
     },
     currentGain: () => {
-        // JAVÍTVA: Z_out helyett Z_load használata a nevezőben!
+        // JAVÍTVA: Z_out helyett Z_load a nevezőben!
         calculated.A_i = calculated.A_v * (component.Z_in / component.Z_load);
         $("#valueOfA_i").text((calculated.A_i).toFixed(2));
     },
@@ -236,7 +245,7 @@ const updatingValue = {
         $("#rangeV_GS").prop('value', calculated.V_GS0);
     },
     V_GS0: () => {
-        $("#valueOfV_GS0").text(Number(calculated.V_GS0).toFixed(2));
+        $("#valueOfV_GS0").text(calculated.V_GS0.toFixed(2));
     },
     positionOfCircuit: () => {
         let c = $("canvas").first();
@@ -245,7 +254,6 @@ const updatingValue = {
     }
 };
 
-// Initial calculations
 jfet.QPointCalc(jfetIndex, simulation.V_DD, 0, simulation.T);
 jfet.TransferCharacteristicMake(jfetIndex, simulation.V_DD, simulation.T, V_GS.Low, V_GS.Up, V_GS.Step);
 
@@ -253,36 +261,128 @@ updatingValue.resistor();
 updatingValue.voltageGain();
 updatingValue.currentGain();
 
-// Chart configuration
 const config = {
     data: {
         labels: jfet.transferV_GS,
-        datasets: [
-            { type: 'line', label: 'JFET transfer characteristic', data: jfet.transferI_D, borderColor: '#6699BB', pointRadius: 0 },
-            { type: 'bubble', label: 'Q-point (optimum)', data: [{ x: calculated.V_GS0, y: defaultParam.current(), r: 5 }], borderWidth: 1, borderColor: '#ff0000', backgroundColor: '#ff0000' },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0, y: 0 }, { x: calculated.V_GS0, y: defaultParam.current() }], borderColor: '#52be80', backgroundColor: '#52be80', borderDash: [8, 2], fill: false },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0, y: defaultParam.current() }, { x: 0, y: defaultParam.current() }], borderColor: '#52be80', backgroundColor: '#52be80', borderDash: [8, 2], fill: false },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0 - simulation.V_inp, y: 0 }, { x: calculated.V_GS0 - simulation.V_inp, y: defaultParam.leftOrBottom() }], borderWidth: 1, pointRadius: 0, borderColor: '#616a6b', borderDash: [8, 2], fill: false },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0 + simulation.V_inp, y: 0 }, { x: calculated.V_GS0 + simulation.V_inp, y: defaultParam.rightOrTop() }], borderWidth: 1, pointRadius: 0, borderColor: '#616a6b', borderDash: [8, 2], fill: false },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0 + simulation.V_inp, y: defaultParam.rightOrTop() }, { x: 0, y: defaultParam.rightOrTop() }], borderWidth: 1, pointRadius: 0, borderColor: '#616a6b', borderDash: [8, 2], fill: false },
-            { type: 'line', label: '', data: [{ x: calculated.V_GS0 - simulation.V_inp, y: defaultParam.leftOrBottom() }, { x: 0, y: defaultParam.leftOrBottom() }], borderWidth: 1, pointRadius: 0, borderColor: '#616a6b', borderDash: [8, 2], fill: false },
-            // Input sine wave (JAVÍTVA: eltolások helyes dinamikus felvétele)
+        datasets: [{
+                type: 'line',
+                label: 'JFET transfer characteristic',
+                data: jfet.transferI_D,
+                borderColor: '#6699BB',
+                pointRadius: 0
+            }, {
+                type: 'bubble',
+                label: 'Q-point (optimum)',
+                data: [{ x: calculated.V_GS0, y: defaultParam.current(), r: 5 }],
+                borderWidth: 1,
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000'
+            },
             {
-                type: 'line', label: '', data: Array.from({ length: sin.NumPoints }, (_, i) => {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0, y: 0 },
+                    { x: calculated.V_GS0, y: defaultParam.current() }
+                ],
+                borderColor: '#52be80',
+                backgroundColor: '#52be80',
+                borderDash: [8, 2],
+                fill: false
+            },
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0, y: defaultParam.current() },
+                    { x: 0, y: defaultParam.current() }
+                ],
+                borderColor: '#52be80',
+                backgroundColor: '#52be80',
+                borderDash: [8, 2],
+                fill: false
+            },
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0 - simulation.V_inp, y: 0 },
+                    { x: calculated.V_GS0 - simulation.V_inp, y: defaultParam.leftOrBottom() }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0 + simulation.V_inp, y: 0 },
+                    { x: calculated.V_GS0 + simulation.V_inp, y: defaultParam.rightOrTop() }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0 + simulation.V_inp, y: defaultParam.rightOrTop() },
+                    { x: 0, y: defaultParam.rightOrTop() }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            {
+                type: 'line',
+                label: '',
+                data: [
+                    { x: calculated.V_GS0 - simulation.V_inp, y: defaultParam.leftOrBottom() },
+                    { x: 0, y: defaultParam.leftOrBottom() }
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                borderColor: '#616a6b',
+                borderDash: [8, 2],
+                fill: false
+            },
+            // EREDETI BEMENETI SZINUSZHULLÁM LOGIKA
+            {
+                type: 'line',
+                label: '',
+                data: Array.from({ length: sin.NumPoints }, (_, i) => {
                     const y = 0 + ((defaultParam.leftOrBottom()) - 0) * (i / (sin.NumPoints - 1)); 
                     const x = simulation.V_inp * Math.sin((i / (sin.NumPoints - 1)) * 4 * Math.PI) + calculated.V_GS0;
                     sin.OutputY.push(jfet.SolvingCurrent(simulation.V_DD, x, simulation.T, jfetIndex) * 1e3);
-                    sin.OutputX.push(0 + (Math.abs(calculated.V_GS0)/sin.NumPoints) * i);
+                    sin.OutputX.push((calculated.V_GS0 + simulation.V_inp) + (Math.abs(calculated.V_GS0 + simulation.V_inp)/sin.NumPoints) * i );
                     return { x, y };
                 }),
-                borderColor: '#ff0000', backgroundColor: '#ff0000', borderWidth: 1, pointRadius: 0, fill: false
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
+                borderWidth: 1,
+                pointRadius: 0,
+                fill: false
             },
-            // Output sine wave
+            // EREDETI KIMENETI SZINUSZHULLÁM LOGIKA
             {
-                type: 'line', label: '', data: Array.from({ length: sin.NumPoints }, (_, i) => {
+                type: 'line',
+                label: '',
+                data: Array.from({ length: sin.NumPoints }, (_, i) => {
                     return { x: sin.OutputX.pop(), y: sin.OutputY.pop() };
                 }),
-                borderColor: '#ff0000', backgroundColor: '#ff0000', borderWidth: 1, pointRadius: 0, fill: false                
+                borderColor: '#ff0000',
+                backgroundColor: '#ff0000',
+                borderWidth: 1,
+                pointRadius: 0,
+                fill: false                
             }
         ]
     },
@@ -290,8 +390,21 @@ const config = {
         animation: { duration: 300 },
         maintainAspectRatio: false,
         scales: {
-            x: { offset: false, min: V_GS.Low, max: V_GS.Up, beginAtZero: false, type: 'linear', title: { display: true, text: 'Gate-Source voltage', font: { weight: 'bold', size: 14 } } },
-            y: { offset: false, min: 0, max: calculated.I_DSS * 1e3, beginAtZero: true, title: { display: true, text: 'Drain current', font: { weight: 'bold', size: 14 } } },
+            x: {
+                offset: false,
+                min: V_GS.Low,
+                max: V_GS.Up,
+                beginAtZero: false,
+                type: 'linear',
+                title: { display: true, text: 'Gate-Source voltage', font: { weight: 'bold', size: '14' } }
+            },
+            y: {
+                offset: false,
+                min: 0,
+                max: calculated.I_DSS * 1e3,
+                beginAtZero: true,
+                title: { display: true, text: 'Drain current', font: { weight: 'bold', size: '14' } }
+            },
         },
         plugins: { legend: { display: false } }
     }
@@ -303,45 +416,46 @@ const chart = new Chart(ctx, config);
 const updatingChart = {
     draw: () => {
         jfet.transferI_D = [];
-        jfet.transferV_GS = [];
         jfet.TransferCharacteristicMake(jfetIndex, simulation.V_DD, simulation.T, V_GS.Low, V_GS.Up, V_GS.Step);
         chart.data.datasets[0].data = jfet.transferI_D;
         chart.update();
     },
     data: (changedV_GS) => {
-        changedV_GS = Number(changedV_GS);
-        let newID_0 = jfet.SolvingCurrent(simulation.V_DD, changedV_GS, simulation.T, jfetIndex);
-        
+        let tempBase, tempStatament, tempCondition;
+
+        newID_0 = jfet.SolvingCurrent(simulation.V_DD, changedV_GS, simulation.T, jfetIndex);
         chart.data.datasets[1].data = [{ x: changedV_GS, y: newID_0 * 1e3, r: 5 }];
         chart.data.datasets[2].data = [{ x: changedV_GS, y: 0 }, { x: changedV_GS, y: newID_0 * 1e3 }];
         chart.data.datasets[3].data = [{ x: changedV_GS, y: newID_0 * 1e3 }, { x: 0, y: newID_0 * 1e3 }];
-        
-        let tempBaseLeft = changedV_GS - simulation.V_inp;
-        let tempBaseRight = changedV_GS + simulation.V_inp;
 
-        chart.data.datasets[4].data = [{ x: tempBaseLeft, y: 0 }, { x: tempBaseLeft, y: jfet.SolvingCurrent(simulation.V_DD, tempBaseLeft, simulation.T, jfetIndex) * 1e3 }];
-        chart.data.datasets[5].data = [{ x: tempBaseRight, y: 0 }, { x: tempBaseRight, y: jfet.SolvingCurrent(simulation.V_DD, tempBaseRight, simulation.T, jfetIndex) * 1e3 }];
+        tempBase = (Number(changedV_GS) - Number(simulation.V_inp));
+        tempCondition = tempBase > V_GS.Low;
+        tempStatament = tempCondition ? tempBase : V_GS.Low;
+        chart.data.datasets[4].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: jfet.SolvingCurrent(simulation.V_DD, tempBase, simulation.T, jfetIndex) * 1e3 }];
 
-        let tempI_D0Up = jfet.SolvingCurrent(simulation.V_DD, tempBaseRight, simulation.T, jfetIndex) * 1e3;
-        let tempI_D0Low = jfet.SolvingCurrent(simulation.V_DD, tempBaseLeft, simulation.T, jfetIndex) * 1e3;
+        tempBase = (Number(changedV_GS) + Number(simulation.V_inp));
+        tempCondition = tempBase < V_GS.Up;
+        tempStatament = tempCondition ? (tempBase) : V_GS.Up;
+        chart.data.datasets[5].data = [{ x: tempStatament, y: 0 }, { x: tempStatament, y: tempCondition ? jfet.SolvingCurrent(simulation.V_DD, tempBase, simulation.T, jfetIndex) * 1e3 : calculated.I_DSS }];
 
-        chart.data.datasets[6].data = [{ x: tempBaseRight, y: tempI_D0Up }, { x: 0, y: tempI_D0Up }];
-        chart.data.datasets[7].data = [{ x: tempBaseLeft, y: tempI_D0Low }, { x: 0, y: tempI_D0Low }];
+        tempBase = Number(changedV_GS) + Number(simulation.V_inp);
+        tempCondition = tempBase < calculated.I_DSS;
+        tempStatament = tempCondition ? tempBase : 0;
+        tempI_D0Up = jfet.SolvingCurrent(simulation.V_DD, tempStatament, simulation.T, jfetIndex) * 1e3;
+        chart.data.datasets[6].data = [{ x: tempStatament, y: tempI_D0Up }, { x: V_GS.Up, y: tempI_D0Up }];
 
-        sin.OutputX = [];
-        sin.OutputY = [];
+        chart.data.datasets[7].data = [{ x: changedV_GS - simulation.V_inp, y: jfet.SolvingCurrent(simulation.V_DD, changedV_GS - simulation.V_inp, simulation.T, jfetIndex) * 1e3 }, { x: V_GS.Up, y: jfet.SolvingCurrent(simulation.V_DD, changedV_GS - simulation.V_inp, simulation.T, jfetIndex) * 1e3 }];
 
-        // JAVÍTVA: A szinusz hullámok eltolása a megváltozott `changedV_GS`-hez lett kötve
-        let tempArray = Array.from({ length: sin.NumPoints }, (_, i) => {
-            const y = 0 + (tempI_D0Low - 0) * (i / (sin.NumPoints - 1));
-            const x = simulation.V_inp * Math.sin((i / (sin.NumPoints - 1)) * 4 * Math.PI) + changedV_GS;
+        tempArray = Array.from({ length: sin.NumPoints }, (_, i) => {
+            const y = 0 + (Number(jfet.SolvingCurrent(simulation.V_DD, changedV_GS - Number(simulation.V_inp), simulation.T, jfetIndex) * 1e3) - 0) * (i / (sin.NumPoints - 1));
+            const x = simulation.V_inp * Math.sin((i / (sin.NumPoints - 1)) * 4 * Math.PI) + Number(calculated.V_GS0);
             sin.OutputY.push(jfet.SolvingCurrent(simulation.V_DD, x, simulation.T, jfetIndex) * 1e3);
-            sin.OutputX.push(0 + (Math.abs(changedV_GS) / sin.NumPoints) * i);
+            sin.OutputX.push((Number(calculated.V_GS0) + simulation.V_inp) + (Math.abs(Number(calculated.V_GS0) + simulation.V_inp)/sin.NumPoints) * i);
             return { x, y };
         });
         chart.data.datasets[8].data = tempArray;
 
-        let tempArray2 = Array.from({ length: sin.NumPoints }, (_, i) => {
+        tempArray2 = Array.from({ length: sin.NumPoints }, (_, i) => {
             return { x: sin.OutputX.pop(), y: sin.OutputY.pop() };
         });
         chart.data.datasets[9].data = tempArray2;
@@ -352,7 +466,9 @@ const updatingChart = {
 
 $(function() {
     updatingValue.positionOfCircuit();
-    $(window).resize(() => updatingValue.positionOfCircuit());
+    $(window).resize(function() {
+        updatingValue.positionOfCircuit();
+    });
 
     simulation.inverted = (simulation.amp == 0);
     $(".inverted").text(simulation.inverted ? "inverted output signal" : "");
@@ -366,18 +482,19 @@ $(function() {
         $('#jfetSelect').append(`<option value="${index}">${model.name}</option>`);
     });
 
-    $('#rangeV_GS').on('change input', function() {
-        calculated.V_GS0 = Number($(this).val());
+    $('#rangeV_GS').on('change', function() {
+        V_GS0Changed = $(this).val();
+        calculated.V_GS0 = V_GS0Changed;
         updatingChart.data(calculated.V_GS0);
-        $("#valueOfV_GS0").text(calculated.V_GS0.toFixed(2));
+        $("#valueOfV_GS0").text(Number(calculated.V_GS0).toFixed(2));
         updatingValue.I_D0();
         updatingValue.resistor();
         updatingValue.voltageGain();
         updatingValue.currentGain();
     });
 
-    $("#rangeV_DD").on('change input', function() {
-        simulation.V_DD = Number($(this).val());
+    $("#rangeV_DD").on('change', function() {
+        simulation.V_DD = $(this).val();
         $('#valueOfRangeV_DD').text(simulation.V_DD);
         updatingChart.draw();
         updatingChart.data(calculated.V_GS0);
@@ -390,8 +507,8 @@ $(function() {
         updatingValue.currentGain();
     });
 
-    $("#rangeT").on('change input', function() {
-        simulation.T = Number($(this).val());
+    $("#rangeT").on('change', function() {
+        simulation.T = $(this).val();
         $('#valueOfRangeT').text(simulation.T);
         updatingChart.draw();
         updatingChart.data(calculated.V_GS0);
@@ -404,8 +521,8 @@ $(function() {
         updatingValue.currentGain();
     });
 
-    $('#rangeV_inp').on('change input', function() {
-        simulation.V_inp = Number($(this).val()) * 1e-3;
+    $('#rangeV_inp').on('change', function() {
+        simulation.V_inp = $(this).val() * 1e-3;
         $('#valueOfRangeV_inp').text((simulation.V_inp * 1e3).toFixed(0));
         updatingChart.data(calculated.V_GS0);
         updatingValue.V_GS();
@@ -413,8 +530,8 @@ $(function() {
         updatingValue.currentGain();
     });
 
-    $('#rangeZ_load').on('change input', function() {
-        component.Z_load = Number($(this).val()) * 1e3;
+    $('#rangeZ_load').on('change', function() {
+        component.Z_load = $(this).val() * 1e3;
         $('#valueOfRangeZ_load').text((component.Z_load * 1e-3).toFixed(1));
         updatingValue.voltageGain();
         updatingValue.currentGain();
@@ -423,13 +540,14 @@ $(function() {
     });
 
     $("#jfetSelect").on('change', function() {
-        jfetIndex = Number($(this).val());
+        jfetIndex = $(this).val();
         V_GS.Low = jfetModels[jfetIndex].params[5];
-        $('#rangeV_GS').attr('min', V_GS.Low);
+        chart.options.scales.y.max = jfet.SolvingCurrent(simulation.V_DDmax, 0, simulation.T, jfetIndex) * 1e3;
+        $('#rangeV_GS').attr('min', jfetModels[jfetIndex].params[5]);
 
         simulation.V_DD = 10.0;
         $("#rangeV_DD").prop('value', simulation.V_DD);
-        $('#valueOfRangeV_DD').text(simulation.V_DD); 
+        $('#valueOfRangeV_DD').text($("#rangeV_DD").val()); 
 
         simulation.T = simulation.T_ref;
         $("#rangeT").prop('value', simulation.T);
@@ -440,22 +558,23 @@ $(function() {
         $('#valueOfRangeZ_load').text((component.Z_load * 1e-3).toFixed(1));
 
         simulation.V_inp = 200e-3;       
-        $("#rangeV_inp").prop('value', simulation.V_inp * 1e3);
-        $('#valueOfRangeV_inp').text(200);
+        $("#rangeV_inp").prop('value', simulation.V_inp*1e+3);
+        $('#valueOfRangeV_inp').text($("#rangeV_inp").val());
 
+        while (jfet.transferV_GS.length > 0) jfet.transferV_GS.pop();
+        while (jfet.transferI_D.length > 0) jfet.transferI_D.pop();
+
+        calculated.V_GS0 = 0;
         jfet.QPointCalc(jfetIndex, simulation.V_DD, 0, simulation.T);
         updatingValue.V_GS();
-        
-        jfet.transferV_GS = [];
-        jfet.transferI_D = [];
-        jfet.TransferCharacteristicMake(jfetIndex, simulation.V_DD, simulation.T, V_GS.Low, V_GS.Up, V_GS.Step);
-        
-        chart.data.datasets[0].data = jfet.transferI_D;
-        chart.options.scales.x.min = V_GS.Low;
-        chart.options.scales.y.max = calculated.I_DSS * 1e3;
-        
         updatingChart.data(calculated.V_GS0);
-        
+
+        jfet.TransferCharacteristicMake(jfetIndex, simulation.V_DD, simulation.T, jfetModels[jfetIndex].params[5], V_GS.Up, V_GS.Step);
+        chart.data.datasets[0].data = jfet.transferI_D;
+        chart.options.scales.x.min = jfetModels[jfetIndex].params[5];
+        chart.options.scales.y.max = calculated.I_DSS * 1e3;
+        chart.update();
+
         updatingValue.resistor();
         updatingValue.voltageGain();
         updatingValue.currentGain();
