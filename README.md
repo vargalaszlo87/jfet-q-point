@@ -1,4 +1,4 @@
-# JFET Q-point v1.0.1
+# JFET Q-point v1.0.0
 
 ## Overview
 
